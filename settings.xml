@@ -1,8 +1,9 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <settings>
-  <!-- Master volume for all music. Decimal between 0 and 1 -->
+  <!-- Master volume is moved to the config file, this line does absolutely nothing -->
   <volume>0.4</volume>
   <!-- Should music loop? If not true, then another song is selected from scene matches -->
+  <!-- the global loop function now acts like an initializer, do not delete it though it may still break the mod -->
   <loop>false</loop>
   <!-- To have this plugin scan a different directory for music files,
         Uncomment <music-path> below (remove <!- - and - -> from the line below) -->
@@ -11,9 +12,6 @@
         Here is where you define what songs are used in which scenes and if they are
         "boss" music (played during teleporter events or not).
 
-        *****  If you just want to play with RoR1 music, you just need to make sure  *****
-        *****  your music filenames match EXACTLY with all name="" attributes below. *****
-
         Here is an example of a file that will play on the title screen and other main menus:
 
         <song
@@ -21,6 +19,8 @@
             scenes="title,lobby,logbook,crystalworld,eclipseworld"
             boss="false"
             volume="1"
+            loop="false" // or true depending on your use case
+            afterboss="true" // can only be used for mithrix currently, if you would like to have afterboss tracks for any boss, you will have to edit the source code of the mod
         />
 
         "name" must match the file name exactly. Supported extensions are ".mp3" and ".wav" (case sensitive).
@@ -36,516 +36,953 @@
         with the same data but with one boss="true" and the other boss="false"
 
         "volume" is a local volume decimal (between 0 and 1) that gets multiplied with the global volume tag.
+        
+        "loop" is well... a function of course, i mean what else do you expect me to say? loops the song when true and 
+        plays silence or moves on to the next track once the current song finishes when false
 
         You can have multiple <song> definitions with the same or similar data. If a scene matches multiple <song>'s
         then this plugin will choose one randomly. If NO matches are found, then the plugin will choose a random
         sound file it found in the plugin folder.
     -->
-  <music>
-    <song
-		name="coordinates that r2modman cannot read ror1.mp3"
-		scenes="foggyswamp,rootjungle"
-		boss="false"
-		volume="0.5"
-        />
-    <song
-		name="arctic oscillation ror1.mp3"
-		scenes="skymeadow,itskymeadow"
-		boss="false"
-		volume="0.5"
-        />
-    <song
-		name="localized entirely within your kitchen ror1.mp3"
-		scenes="golemplains,golemplains2,snowyforest,itgolemplains"
-		boss="false"
-		volume="0.5"
-        />
-    <song
-		name="autumn song ror1.mp3"
-		scenes="wispgraveyard"
-		boss="false"
-		volume="0.5"
-        />
-    <song
-		name="coalescence ror1.mp3"
-		scenes="moon2,itmoon"
-		boss="false"
-		volume="0.5"
-        />
-    <song
-		name="cyclogenesis ror1.mp3"
-		scenes="goolake,itgoolake"
-		boss="false"
-		volume="0.5"
-        />
-    <song
-		name="dew point ror1.mp3"
-		scenes="golemplains,golemplains2,foggyswamp"
-		boss="true"
-		volume="0.5"
-        />
-
-    <song
-		name="dew point ror1 alt.mp3"
-		scenes="golemplains,golemplains2,foggyswamp"
-		boss="true"
-		volume="0.5"
-        />
-    <song
-		name="double demonetized rainbow ror1.mp3"
-		scenes="shipgraveyard,rootjungle"
-		boss="true"
-		volume="0.5"
-        />
-    <song
-		name="double demonetized rainbow alt ror1.mp3"
-		scenes="shipgraveyard,rootjungle"
-		boss="true"
-		volume="0.5"
-        />
-    <song
-		name="double demonetized rainbow alt 2 ror1.mp3"
-		scenes="shipgraveyard,rootjungle"
-		boss="true"
-		volume="0.5"
-        />
-    <song
-		name="hailstorm ror1.mp3"
-		scenes="sulfurpools,dampcavesimple,dampcave"
-		boss="true"
-		volume="0.5"
-        />
-   <song
-		name="moisture deficit ror1.mp3"
-		scenes="goolake,wispgraveyard"
-		boss="true"
-		volume="0.5"
-        />
-   <song
-		name="moisture deficit alt ror1.mp3"
-		scenes="goolake,wispgraveyard"
-		boss="true"
-		volume="0.5"
-        />
-   <song
-		name="winds of destruction ror1.mp3"
-		scenes="blackbeach,blackbeach2"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="title theme ror1.mp3"
-		scenes="eclipseworld"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="title theme alt ror1.mp3"
-		scenes="eclipseworld"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="surface tension ror1.mp3"
-		scenes="blackbeach,blackbeach2,golemplains,golemplains2,snowyforest"
-		boss="true"
-		volume="0.5"
-        />
-   <song
-		name="surface tension alt ror1.mp3"
-		scenes="blackbeach,blackbeach2,golemplains,golemplains2,snowyforest"
-		boss="true"
-		volume="0.5"
-        />
-   <song
-		name="tropic of cancer ror1.mp3"
-		scenes="frozenwall,dampcavesimple,dampcave,shipgraveyard"
-		boss="true"
-		volume="0.5"
-        />
-   <song
-		name="tropic of cancer alt ror1.mp3"
-		scenes="frozenwall,dampcavesimple,dampcave,shipgraveyard"
-		boss="true"
-		volume="0.5"
-        />
-   <song
-		name="tropic of capricorn ror1.mp3"
-		scenes="dampcavesimple,dampcave,itdampcave"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="ashes to many ashes deadbolt.mp3"
-		scenes="sulfurpools"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="blood on the dancefloor deadbolt.mp3"
-		scenes="artifactworld"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="break of dawn deadbolt.mp3"
-		scenes="mysteryspace"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="defunktorum deadbolt.mp3"
-		scenes="arena"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="dies irae deadbolt.mp3"
-		scenes="voidstage"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="hemolysis deadbolt.mp3"
-		scenes="voidstage"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="heynong man deadbolt.mp3"
-		scenes="rootjungle"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="now i am become death deadbolt.mp3"
-		scenes="limbo"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="reaper blues deadbolt.mp3"
-		scenes="ancientloft,itancientloft"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="the banality of eternity deadbolt.mp3"
-		scenes="goldshores"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="the choir invisible alt deadbolt.mp3"
-		scenes="dampcavesimple,dampcave,itdampcave"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="the great beyond deadbolt.mp3"
-		scenes="arena"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="the proverbial dust biters deadbolt.mp3"
-		scenes="shipgraveyard"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="the way of dodo deadbolt.mp3"
-		scenes="bazaar"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="undead man walkin deadbolt.mp3"
-		scenes="arena"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="werner and claus deadbolt.mp3"
-		scenes="artifactworld"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="he did not lie a glacier can fart ror2.mp3"
-		scenes="arena"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="coalescence 2 electric boogaloo ror2.mp3"
-		scenes="moon2,itmoon"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="koppen as redacted alt ror2.mp3"
-		scenes="foggyswamp,ancientloft,wispgraveyard,shipgraveyard"
-		boss="true"
-		volume="0.5"
-        />
-   <song
-		name="koppen as redacted alt 2 ror2.mp3"
-		scenes="foggyswamp,ancientloft,wispgraveyard,shipgraveyard"
-		boss="true"
-		volume="0.5"
-        />
-   <song
-		name="koppen as redacted alt 3 ror2.mp3"
-		scenes="foggyswamp,ancientloft,wispgraveyard,shipgraveyard"
-		boss="true"
-		volume="0.5"
-        />
-   <song
-		name="arctic oscillation but more epic ror2.mp3"
-		scenes="skymeadow"
-		boss="true"
-		volume="0.5"
-        />
-   <song
-		name="arctic oscillation but more epic alt ror2.mp3"
-		scenes="skymeadow"
-		boss="true"
-		volume="0.5"
-        />
-   <song
-		name="arctic oscillation but more epic alt 2 ror2.mp3"
-		scenes="skymeadow"
-		boss="true"
-		volume="0.5"
-        />
-   <song
-		name="disdrometer ror2.mp3"
-		scenes="golemplains,golemplains2,wispgraveyard,itgolemplains"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="evapotranspiration ror2.mp3"
-		scenes="blackbeach,blackbeach2"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="aliens from movie signs ror2.mp3"
-		scenes="snowyforest,frozenwall,dampcavesimple,dampcave,rootjungle"
-		boss="true"
-		volume="0.5"
-        />
-   <song
-		name="aliens from movie signs alt ror2.mp3"
-		scenes="snowyforest,frozenwall,dampcavesimple,dampcave,rootjungle"
-		boss="true"
-		volume="0.5"
-        />
-   <song
-		name="into the doldrums ror2.mp3"
-		scenes="frozenwall,goldshores,itfrozenwall"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="coalescense alyx ror2.mp3"
-		scenes="outro"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="nocturnal emission ror2.mp3"
-		scenes="foggyswamp"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="as long as you have enough rubies ror2.mp3"
-		scenes="bazaar"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="2001 space oddysey ror2.mp3"
-		scenes="mysteryspace"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="2001 space oddysey alt ror2.mp3"
-		scenes="limbo"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="title themes combined ror2.mp3"
-		scenes="title,lobby,logbook,crystalworld"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="terra pluviam ror2.mp3"
-		scenes="goolake,dampcavesimple,dampcave,itdampcave"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="the rain formerly known as autumn song ror2.mp3"
-		scenes="skymeadow,itskymeadow"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="the raindrop that fell to the sky ror2.mp3"
-		scenes="shipgraveyard,artifactworld"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="thermodynamic equilibrium ror2.mp3"
-		scenes="blackbeach,blackbeach2,goolake"
-		boss="true"
-		volume="0.5"
-        />
-   <song
-		name="thermodynamic equilibrium alt ror2.mp3"
-		scenes="blackbeach,blackbeach2,goolake"
-		boss="true"
-		volume="0.5"
-        />
-   <song
-		name="thermodynamic equilibrium alt 2 ror2.mp3"
-		scenes="blackbeach,blackbeach2,goolake"
-		boss="true"
-		volume="0.5"
-        />
-   <song
-		name="through a cloud darkly ror2.mp3"
-		scenes="splash,intro"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="a boat made from a sheet of newspaper sotv.mp3"
-		scenes="wispgraveyard,sulfurpools"
-		boss="true"
-		volume="0.5"
-        />
-   <song
-		name="a boat made from a sheet of newspaper alt sotv.mp3"
-		scenes="wispgraveyard,sulfurpools"
-		boss="true"
-		volume="0.5"
-        />
-   <song
-		name="a placid isle of ignorance sotv.mp3"
-		scenes="voidstage"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="having fallen it was blood sotv.mp3"
-		scenes="blackbeach,blackbeach2,snowyforest,ancientloft"
-		boss="true"
-		volume="0.5"
-        />
-   <song
-		name="having fallen it was blood alt sotv.mp3"
-		scenes="blackbeach,blackbeach2,snowyforest,ancientloft"
-		boss="true"
-		volume="0.5"
-        />
-   <song
-		name="once a lullaby sotv.mp3"
-		scenes="ancientloft,itancientloft"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="out of whomst coochie came the ice sotv.mp3"
-		scenes="snowyforest,frozenwall,itfrozenwall"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="raindrop prelude sotv.mp3"
-		scenes="infinitetowerworld"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="raindrop prelude alt sotv.mp3"
-		scenes="infinitetowerworld"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="the face of the giant enemy spidercrab sotv.mp3"
-		scenes="voidraid"
-		boss="true"
-		volume="0.5"
-        />
-   <song
-		name="the face of the giant enemy spidercrab alt sotv.mp3"
-		scenes="voidraid"
-		boss="true"
-		volume="0.5"
-        />
-   <song
-		name="the face of the giant enemy spidercrab sotv.mp3"
-		scenes="voidraid"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="the face of the giant enemy spidercrab alt sotv.mp3"
-		scenes="voidraid"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="they might as well be dead sotv.mp3"
-		scenes="rootjungle"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="who can fathom the raindrop dark souls version sotv.mp3"
-		scenes="sulfurpools,itgoolake"
-		boss="false"
-		volume="0.5"
-        />
-   <song
-		name="mithrix beats 1.mp3"
-		scenes="moon2"
-		boss="true"
-		volume="0.5"
-        />
-   <song
-		name="mithrix beats 2.mp3"
-		scenes="moon2"
-		boss="true"
-		volume="0.5"
-        />
-   <song
-		name="mithrix beats 3.mp3"
-		scenes="moon2"
-		boss="true"
-		volume="0.5"
-        />
-   <song
-		name="mithrix beats 4.mp3"
-		scenes="moon2"
-		boss="true"
-		volume="0.5"
-        />
-   <song
-		name="psgc ror2.mp3"
-		scenes="loadingbasic"
-		boss="false"
-		volume="0.5"
-        />
-  </music>
+<music>
+<!-- Cutscene Music -->
+        <song
+            name="M_01_Intro.mp3"
+            scenes="Intro,splash"
+            boss="false"
+            volume="0.85"
+        />
+        <song
+            name="M_02_Outro.mp3"
+            scenes="outro"
+            boss="false"
+            volume="0.90"
+        /> 		
+        <song
+            name="M_03_Splash.mp3"
+            scenes="splash"
+            boss="false"
+            volume="0.85"
+        /> 		
+		
+<!-- Menus Music -->	
+        <song
+            name="MM_01_Menu.mp3"
+            scenes="title"
+            boss="false"
+            volume="0.85"
+            loop="true"
+        />
+        <song
+            name="MM_02_CharacterSelect.mp3"
+            scenes="lobby"
+            boss="false"
+            volume="0.85"
+            loop="true"
+        />
+        <song
+            name="MM_03_Logbook.mp3"
+            scenes="logbook"
+            boss="false"
+            volume="0.85"
+            loop="true"
+        />
+        <song
+            name="MM_04_LoadingScreen.mp3"
+            scenes="loadingbasic"
+            boss="false"
+            volume="0.85"
+            loop="true"
+        />
+<!-- Extra Menus -->
+        <song
+            name="MME_01_Prismatic.mp3"
+            scenes="crystalworld"
+            boss="false"
+            volume="0.85"
+        />
+        <song
+            name="MME_02_Eclipse.mp3"
+            scenes="eclipseworld"
+            boss="false"
+            volume="0.85"
+        />
+        <song
+            name="MME_03_Simulacrum.mp3"
+            scenes="infinitetowerworld"
+            boss="false"
+            volume="0.85"
+        />
+<!-- Simulacrum Music -->
+        <song
+            name="S_01_Rallypoint.mp3"
+            scenes="itfrozenwall"
+            boss="false"
+            volume="0.85"
+            loop="false"
+        />
+        <song
+            name="S_01_RallypointLoop.mp3"
+            scenes="itfrozenwall"
+            boss="false"
+            volume="0.85"
+            loop="true"
+        />
+        <song
+            name="S_02_Aphelian.mp3"
+            scenes="itancientloft"
+            boss="false"
+            volume="0.85"
+            loop="false"
+        />
+        <song
+            name="S_02_AphelianLoop.mp3"
+            scenes="itancientloft"
+            boss="false"
+            volume="0.85"
+            loop="true"
+        />
+        <song
+            name="S_03_Abyssal.mp3"
+            scenes="itdampcave"
+            boss="false"
+            volume="0.85"
+            loop="false"
+        />
+        <song
+            name="S_03_AbyssalLoop.mp3"
+            scenes="itdampcave"
+            boss="false"
+            volume="0.85"
+            loop="true"
+        />
+        <song
+            name="S_04_TitanicPlains.mp3"
+            scenes="itgolemplains"
+            boss="false"
+            volume="0.85"
+            loop="false"
+        />
+        <song
+            name="S_04_TitanicPlainsLoop.mp3"
+            scenes="itgolemplains"
+            boss="false"
+            volume="0.85"
+            loop="true"
+        />
+        <song
+            name="S_05_AbandonedAqueduct.mp3"
+            scenes="itgoolake"
+            boss="false"
+            volume="0.85"
+            loop="false"
+        />
+        <song
+            name="S_05_AbandonedAqueductLoop.mp3"
+            scenes="itgoolake"
+            boss="false"
+            volume="0.85"
+            loop="true"
+        />
+        <song
+            name="S_06_SkyMeadow.mp3"
+            scenes="itskymeadow"
+            boss="false"
+            volume="0.85"
+            loop="false"
+        />
+        <song
+            name="S_06_SkyMeadowLoop.mp3"
+            scenes="itskymeadow"
+            boss="false"
+            volume="0.85"
+            loop="true"
+        />
+        <song
+            name="S_07_Commencement.mp3"
+            scenes="itmoon"
+            boss="false"
+            volume="0.70"
+            loop="false"
+        />
+        <song
+            name="S_07_CommencementLoop.mp3"
+            scenes="itmoon"
+            boss="false"
+            volume="0.70"
+            loop="true"
+        />
+<!-- Stage 1 Music -->
+        <song
+            name="S1_01_TitanicPlains.mp3"
+            scenes="golemplains,golemplains2"
+            boss="false"
+            volume="0.85" 
+            loop="false"
+        />	
+		<song
+            name="S1_02_TitanicPlainsLoop.mp3"
+            scenes="golemplains2,golemplains"
+            boss="false"
+            volume="0.85"
+            loop="true"
+        />
+		<song
+            name="S1_03_DistantRoost.mp3"
+            scenes="blackbeach,blackbeach2"
+            boss="false"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="S1_04_DistantRoostLoop.mp3"
+            scenes="blackbeach2,blackbeach"
+            boss="false"
+            volume="0.85" 
+            loop="true"
+        />
+		<song
+            name="S1_06_SiphonedForest.mp3"
+            scenes="snowyforest"
+            boss="false"
+            volume="0.85" 
+            loop="false"
+        />		
+		<song
+            name="S1_06_SiphonedForestLoop.mp3"
+            scenes="snowyforest"
+            boss="false"
+            volume="0.85" 
+            loop="true"
+        />		
+		<song
+            name="S1_07_ShatteredAbodes.mp3"
+            scenes="village"
+            boss="false"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="S1_07_ShatteredAbodesLoop.mp3"
+            scenes="village"
+            boss="false"
+            volume="0.85" 
+            loop="true"
+        />		
+		<song
+            name="S1_08_DisturbedImpact.mp3"
+            scenes="villagenight"
+            boss="false"
+            volume="0.85" 
+        />
+		<song
+            name="S1_09_VerdantFalls.mp3"
+            scenes="lakes"
+            boss="false"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="S1_09_VerdantFallsLoop.mp3"
+            scenes="lakes"
+            boss="false"
+            volume="0.85" 
+            loop="true"
+        />
+		<song
+            name="S1_10_ViscousFalls.mp3"
+            scenes="lakesnight"
+            boss="false"
+            volume="0.85" 
+            loop="true"
+        />
+<!-- Stage 1 Boss Music -->
+        <song
+            name="S1B_01_TitanicPlains.mp3"
+            scenes="golemplains,golemplains2"
+            boss="true"
+            volume="0.85"
+            loop="false"
+        />	
+		<song
+            name="S1B_03_DistantRoost.mp3"
+            scenes="blackbeach,blackbeach2"
+            boss="true"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="S1B_06_SiphonedForest.mp3"
+            scenes="snowyforest"
+            boss="true"
+            volume="0.85" 
+            loop="false"
+        />		
+		<song
+            name="S1B_07_ShatteredAbodes.mp3"
+            scenes="village"
+            boss="true"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="S1B_08_DisturbedImpact.mp3"
+            scenes="villagenight"
+            boss="true"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="S1B_09_VerdantFalls.mp3"
+            scenes="lakes"
+            boss="true"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="S1B_10_ViscousFalls.mp3"
+            scenes="lakesnight"
+            boss="true"
+            volume="0.85" 
+            loop="false"
+        />
+<!-- Stage 2 Music -->
+        <song
+            name="S2_01_AbandonedAqueduct.mp3"
+            scenes="goolake"
+            boss="false"
+            volume="0.85" 
+            loop="false"
+        />	
+        <song
+            name="S2_01_AbandonedAqueductLoop.mp3"
+            scenes="goolake"
+            boss="false"
+            volume="0.85" 
+            loop="true"
+        />	
+		<song
+            name="S2_02_WetlandAspect.mp3"
+            scenes="foggyswamp"
+            boss="false"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="S2_02_WetlandAspectLoop.mp3"
+            scenes="foggyswamp"
+            boss="false"
+            volume="0.85" 
+            loop="true"
+        />
+		<song
+            name="S2_03_AphelianSanctuary.mp3"
+            scenes="ancientloft"
+            boss="false"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="S2_03_AphelianSanctuaryLoop.mp3"
+            scenes="ancientloft"
+            boss="false"
+            volume="0.85" 
+            loop="true"
+        />
+		<song
+            name="S2_04_ReformedAltar.mp3"
+            scenes="lemuriantemple"
+            boss="false"
+            volume="0.85" 
+            loop="false"
+        />  
+		<song
+            name="S2_04_ReformedAltarLoop.mp3"
+            scenes="lemuriantemple"
+            boss="false"
+            volume="0.85" 
+            loop="true"
+        />      
+		<song
+            name="S2_05_PretendersPrecipice.mp3"
+            scenes="nest"
+            boss="false"
+            volume="0.85" 
+            loop="false"
+        />	
+		<song
+            name="S2_05_PretendersPrecipiceLoop.mp3"
+            scenes="nest"
+            boss="false"
+            volume="0.85" 
+            loop="true"
+        />			
+<!-- Stage 2 Boss Music -->
+        <song
+            name="S2B_01_AbandonedAqueduct.mp3"
+            scenes="goolake"
+            boss="True"
+            volume="0.85" 
+            loop="false"
+        />	
+		<song
+            name="S2B_02_WetlandAspect.mp3"
+            scenes="foggyswamp"
+            boss="True"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="S2B_03_AphelianSanctuary.mp3"
+            scenes="ancientloft"
+            boss="True"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="S2B_04_ReformedAltar.mp3"
+            scenes="lemuriantemple"
+            boss="True"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="S2B_05_PretendersPrecipice.mp3"
+            scenes="nest"
+            boss="True"
+            volume="0.85" 
+            loop="false"
+        />
+<!-- Stage 3 Music -->
+        <song
+            name="S3_01_RallypointDelta.mp3"
+            scenes="frozenwall"
+            boss="false"
+            volume="0.85" 
+            loop="false"
+        />	
+        <song
+            name="S3_01_RallypointDeltaLoop.mp3"
+            scenes="frozenwall"
+            boss="false"
+            volume="0.85" 
+            loop="true"
+        />	
+		<song
+            name="S3_02_ScorchedAcres.mp3"
+            scenes="wispgraveyard"
+            boss="false"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="S3_02_ScorchedAcresLoop.mp3"
+            scenes="wispgraveyard"
+            boss="false"
+            volume="0.85" 
+            loop="true"
+        />
+		<song
+            name="S3_03_SulfurPools.mp3"
+            scenes="sulfurpools"
+            boss="false"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="S3_03_SulfurPoolsLoop.mp3"
+            scenes="sulfurpools"
+            boss="false"
+            volume="0.85" 
+            loop="true"
+        />
+		<song
+            name="S3_04_IronAlluvium.mp3"
+            scenes="ironalluvium"
+            boss="false"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="S3_04_IronAlluviumLoop.mp3"
+            scenes="ironalluvium"
+            boss="false"
+            volume="0.85" 
+            loop="true"
+        />
+		<song
+            name="S3_05_IronAuroras.mp3"
+            scenes="ironalluvium2"
+            boss="false"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="S3_05_IronAurorasLoop.mp3"
+            scenes="ironalluvium2"
+            boss="false"
+            volume="0.85" 
+            loop="true"
+        />
+		<song
+            name="S3_06_TreebornColony.mp3"
+            scenes="habitat"
+            boss="false"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="S3_06_TreebornColonyLoop.mp3"
+            scenes="habitat"
+            boss="false"
+            volume="0.85" 
+            loop="true"
+        />
+		<song
+            name="S3_07_GoldenDieback.mp3"
+            scenes="habitatfall"
+            boss="false"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="S3_07_GoldenDiebackLoop.mp3"
+            scenes="habitatfall"
+            boss="false"
+            volume="0.85" 
+            loop="true"
+        />						
+<!-- Stage 3 Boss Music -->
+        <song
+            name="S3B_01_RallypointDelta.mp3"
+            scenes="frozenwall"
+            boss="true"
+            volume="0.85" 
+            loop="false"
+        />	
+		<song
+            name="S3B_02_ScorchedAcres.mp3"
+            scenes="wispgraveyard"
+            boss="true"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="S3B_03_SulfurPools.mp3"
+            scenes="sulfurpools"
+            boss="true"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="S3B_04_IronAlluvium.mp3"
+            scenes="ironalluvium"
+            boss="true"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="S3B_05_IronAuroras.mp3"
+            scenes="ironalluvium2"
+            boss="true"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="S3B_06_TreebornColony.mp3"
+            scenes="habitat"
+            boss="true"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="S3B_07_GoldenDieback.mp3"
+            scenes="habitatfall"
+            boss="true"
+            volume="0.85" 
+            loop="false"
+        />	
+<!-- Stage 4 Music -->
+        <song
+            name="S4_01_AbyssalDepths.mp3"
+            scenes="dampcavesimple"
+            boss="false"
+            volume="0.85" 
+            loop="false"
+        />	
+        <song
+            name="S4_01_AbyssalDepthsLoop.mp3"
+            scenes="dampcavesimple"
+            boss="false"
+            volume="0.85" 
+            loop="true"
+        />	
+		<song
+            name="S4_02_SirensCall.mp3"
+            scenes="shipgraveyard"
+            boss="false"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="S4_02_SirensCallLoop.mp3"
+            scenes="shipgraveyard"
+            boss="false"
+            volume="0.85" 
+            loop="true"
+        />
+		<song
+            name="S4_03_SunderedGrove.mp3"
+            scenes="rootjungle"
+            boss="false"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="S4_03_SunderedGroveLoop.mp3"
+            scenes="rootjungle"
+            boss="false"
+            volume="0.85" 
+            loop="true"
+        />
+		<song
+            name="S4_04_RepurposedCrater.mp3"
+            scenes="repurposedcrater"
+            boss="false"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="S4_04_RepurposedCraterLoop.mp3"
+            scenes="repurposedcrater"
+            boss="false"
+            volume="0.85" 
+            loop="true"
+        />
+		<song
+            name="S4_05_ConduitCanyon.mp3"
+            scenes="conduitcanyon"
+            boss="false"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="S4_05_ConduitCanyonLoop.mp3"
+            scenes="conduitcanyon"
+            boss="false"
+            volume="0.85" 
+            loop="true"
+        />
+<!-- Stage 4 Boss Music -->
+        <song
+            name="S4B_01_AbyssalDepths.mp3"
+            scenes="dampcavesimple"
+            boss="True"
+            volume="0.85" 
+            loop="false"
+        />	
+		<song
+            name="S4B_02_SirensCall.mp3"
+            scenes="shipgraveyard"
+            boss="True"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="S4B_03_SunderedGrove.mp3"
+            scenes="rootjungle"
+            boss="True"
+            volume="0.85"
+            loop="false" 
+        />
+		<song
+            name="S4B_04_RepurposedCrater.mp3"
+            scenes="repurposedcrater"
+            boss="True"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="S4B_05_ConduitCanyon.mp3"
+            scenes="conduitcanyon"
+            boss="True"
+            volume="0.85"
+            loop="false" 
+        />
+<!-- Stage 5 Music -->		
+		<song
+            name="S5_01_SkyMeadow.mp3"
+            scenes="skymeadow"
+            boss="False"
+            volume="0.90" 
+            loop="false"
+        />
+		<song
+            name="S5_01_SkyMeadowLoop.mp3"
+            scenes="skymeadow"
+            boss="False"
+            volume="0.90" 
+            loop="true"
+        />
+		<song
+            name="S5_02_HelminthHatchery.mp3"
+            scenes="helminthroost"
+            boss="False"
+            volume="0.90" 
+            loop="false"
+        />
+		<song
+            name="S5_02_HelminthHatcheryLoop.mp3"
+            scenes="helminthroost"
+            boss="False"
+            volume="0.90" 
+            loop="true"
+        />
+<!-- Stage 5 Boss Music -->
+		<song
+            name="S5B_01_SkyMeadow.mp3"
+            scenes="skymeadow"
+            boss="True"
+            volume="0.90" 
+            loop="false"
+        />
+		<song
+            name="S5B_02_HelminthHatchery.mp3"
+            scenes="helminthroost"
+            boss="True"
+            volume="0.90" 
+            loop="false"
+        />
+<!-- Stage Endgame Music -->
+		<song
+            name="SE_01_Commencement.mp3"
+            scenes="moon2,moon"
+            boss="False"
+            volume="0.85" 
+            loop="true"
+        />
+		<song
+            name="SE_02_SolutionalHaunt.mp3"
+            scenes="solutionalhaunt"
+            boss="False"
+            volume="0.85" 
+            loop="true"
+        />
+		<song
+            name="SE_03_ComputationalExchage.mp3"
+            scenes="computationalexchange"
+            boss="False"    
+            volume="0.85" 
+            loop="true"
+        />
+<!-- Stage Endgame Boss Music -->
+		<song
+            name="SEB_01_Commencement.mp3"
+            scenes="moon2,moon"
+            boss="True"
+            volume="0.90" 
+            loop="false"
+        />
+		<song
+            name="SEB_01_CommencementLoop.mp3"
+            scenes="moon2,moon"
+            boss="True"
+            volume="0.90" 
+            loop="true"
+        />
+		<song
+            name="SEB_01_CommencementEscape.mp3"
+            scenes="moon2,moon"
+            boss="false"
+            afterboss="true"
+            volume="0.90" 
+            loop="false"
+        />
+		<song
+            name="SEB_02_SolutionalHaunt.mp3"
+            scenes="solutionalhaunt"
+            boss="True"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="SEB_02_SolutionalHauntLoop.mp3"
+            scenes="solutionalhaunt"
+            boss="True"
+            volume="0.85" 
+            loop="true"
+        />
+<!-- Stage Final Music -->
+		<song
+            name="SF_01_Planetarium.mp3"
+            scenes="voidraid"
+            boss="False"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="SF_02_PrimeMeridian.mp3"
+            scenes="meridian"
+            boss="False"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="SF_02_PrimeMeridianLoop.mp3"
+            scenes="meridian"
+            boss="False"
+            volume="0.85" 
+            loop="true"
+        />
+		<song
+            name="SF_03_NeuralSanctum.mp3"
+            scenes="solusweb"
+            boss="False"
+            volume="0.85" 
+            loop="true"
+        />
+<!-- Stage Final Boss Music -->
+		<song
+            name="SFB_01_Planetarium.mp3"
+            scenes="voidraid"
+            boss="True"
+            volume="0.70" 
+            loop="false"
+        />
+		<song
+            name="SFB_01_PlanetariumLoop.mp3"
+            scenes="voidraid"
+            boss="True"
+            volume="0.70" 
+            loop="true"
+        />
+		<song
+            name="SFB_02_PrimeMeridian.mp3"
+            scenes="meridian"
+            boss="True"
+            volume="0.90" 
+            loop="false"
+        />
+		<song
+            name="SFB_02_PrimeMeridianLoop.mp3"
+            scenes="meridian"
+            boss="True"
+            volume="0.90" 
+            loop="true"
+        />
+		<song
+            name="SFB_03_NeuralSanctum.mp3"
+            scenes="solusweb"
+            boss="True"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="SFB_03_NeuralSanctumLoop.mp3"
+            scenes="solusweb"
+            boss="True"
+            volume="0.85" 
+            loop="true"
+        />
+<!-- Hidden Realms Music -->
+		<song
+            name="SHR_01_Bazaar.mp3"
+            scenes="bazaar"
+            boss="False"
+            volume="0.85" 
+            loop="true"
+        />
+		<song
+            name="SHR_02_MFractured.mp3"
+            scenes="mysteryspace"
+            boss="False"
+            volume="0.85" 
+            loop="true"
+        />
+		<song
+            name="SHR_03_MWhole.mp3"
+            scenes="limbo"
+            boss="False"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="SHR_03_MWholeLoop.mp3"
+            scenes="limbo"
+            boss="False"
+            volume="0.85" 
+            loop="true"
+        />
+		<song
+            name="SHR_04_GildedCoast.mp3"
+            scenes="goldshores"
+            boss="False"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="SHR_04_GildedCoastLoop.mp3"
+            scenes="goldshores"
+            boss="False"
+            volume="0.85" 
+            loop="true"
+        />
+		<song
+            name="SHR_05_Bulwarks1.mp3"
+            scenes="artifactworld"
+            boss="False"
+            volume="0.85" 
+            loop="true"
+        />
+		<song
+            name="SHR_06_Bulwarks2.mp3"
+            scenes="artifactworld01"
+            boss="False"
+            volume="0.85" 
+            loop="true"
+        />
+		<song
+            name="SHR_07_Bulwarks3.mp3"
+            scenes="artifactworld02"
+            boss="False"
+            volume="0.85" 
+            loop="true"
+        />
+		<song
+            name="SHR_08_Bulwarks4.mp3"
+            scenes="artifactworld03"
+            boss="False"
+            volume="0.85" 
+            loop="true"
+        />
+<!-- Void Route Music -->
+		<song
+            name="SHR_09_VoidFields.mp3"
+            scenes="arena"
+            boss="False"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="SHR_09_VoidFieldsLoop.mp3"
+            scenes="arena"
+            boss="False"
+            volume="0.85" 
+            loop="true"
+        />
+		<song
+            name="SHR_10_VoidLocus.mp3"
+            scenes="voidstage"
+            boss="False"
+            volume="0.85" 
+            loop="false"
+        />
+		<song
+            name="SHR_10_VoidLocusLoop.mp3"
+            scenes="voidstage"
+            boss="False"
+            volume="0.85" 
+            loop="true"
+        />
+    </music>
 </settings>
