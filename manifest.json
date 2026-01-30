@@ -1,0 +1,12 @@
+{
+  "name": "More_OSTs_Mod",
+  "description": "This mod adds more music composed by Chris Christodoulou. NEW FEATURES: IN-GAME VOLUME SLIDER AND BOSS TRACK VARIATIONS",
+  "website_url": "",
+  "version_number": "2.0.2",
+  "dependencies": [
+    "bbepis-BepInExPack-5.4.1905",
+    "tristanmcpherson-R2API-4.4.1",
+    "RiskofThunder-HookGenPatcher-1.2.3",
+    "Rune580-Risk_Of_Options-2.5.3"
+  ]
+}
