@@ -1,4 +1,4 @@
-﻿using BepInEx;
+using BepInEx;
 using BepInEx.Configuration;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
@@ -224,7 +224,7 @@ namespace OriginalSoundTrack
                 Debug.Log("====================== MITHRIX BOSS FIGHT DONE ======================");
                 bossActive = false;
                 afterBossPhase = true;
-                PickOutMusic(); 
+                PickOutMusic();
             };
 
 
@@ -472,6 +472,28 @@ namespace OriginalSoundTrack
             }
         }
 
+        private void FixedUpdate()
+        {
+            if (currentSong != null)
+            {
+                if (currentSong.Position >= currentSong.Length && !shouldLoop)
+                {
+                    outputDevice.Stop();
+                    currentSong.Position = currentSong.Length - 1;
+                    PickOutMusic(bossActive);
+                }
+            }
+        }
+
+        private void OnDestroy()
+        {
+            var convar = RoR2.Console.instance.FindConVar("volume_music");
+            if (convar != null)
+            {
+                convar.SetString(oldMusicVolume);
+            }
+        }
+
 
         public class Music
         {
@@ -533,6 +555,7 @@ namespace OriginalSoundTrack
                 }
                 return read;
             }
+
         }
     }
 }
