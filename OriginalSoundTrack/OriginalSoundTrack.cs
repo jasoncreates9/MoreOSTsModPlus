@@ -63,7 +63,7 @@ namespace OriginalSoundTrack
         private SceneIndex lastStageIndex = SceneIndex.Invalid;
         private bool bossActive = false; // determines whether or not the teleporter is active, also used for "final" boss fights to prevent normal tracks from playing if current boss is alive
         private bool afterBossPhase = false; // prevents tracks without the "afterboss" tag from playing once a "final" boss is defeated basically, thats also how i fixed mithrix not having an escape theme :3
-
+        private bool simulacrumactive = false;
 
 
         //The Awake() method is run at the very start when the game is initialized.
@@ -121,11 +121,10 @@ namespace OriginalSoundTrack
                         newMusic.scenes = GetAttribute(node, "scenes").Split(',').Select(str => str.Trim()).ToArray();
                         newMusic.boss = GetAttribute(node, "boss").ToLower() == "true";
                         newMusic.afterboss = GetAttribute(node, "afterboss").ToLower() == "true";
-                        newMusic.volume = 1f;
-                        var vol = GetAttribute(node, "volume");
-                        if (vol != "")
+                        newMusic.simulacrum = GetAttribute(node, "simulacrum").ToLower() == "true";
+                        if (float.TryParse(GetAttribute(node, "volume"), out float volume)) // friend helped me here, hes a cutie :3
                         {
-                            newMusic.volume = float.Parse(vol, CultureInfo.InvariantCulture);
+                            newMusic.volume = volume;
                         }
 
                         newMusic.loop = GetAttribute(node, "loop").ToLower() == "true";
@@ -206,6 +205,20 @@ namespace OriginalSoundTrack
                     outputDevice.Play();
                     songPaused = false;
                 }
+            };
+
+            On.RoR2.InfiniteTowerRun.Start += (orig, self) =>
+            {
+                orig(self);
+                simulacrumactive = true;
+                PickOutMusic();
+            };
+
+            On.RoR2.InfiniteTowerRun.OnDestroy += (orig, self) =>
+            {
+                orig(self);
+                simulacrumactive = false;
+                PickOutMusic();
             };
 
             // On.EntityStates.VoidRaidCrab.SpawnState.OnEnter
@@ -378,9 +391,13 @@ namespace OriginalSoundTrack
                 {
                     return music.afterboss && matchScene && music.fullName != null;
                 }
+                if (simulacrumactive)
+                {
+                    return music.simulacrum == simulacrumactive && matchScene && music.fullName != null;
+                }
 
                 var bossTest = isForTeleporter == music.boss;
-                return music.fullName != null && bossTest && matchScene && !music.afterboss;
+                return music.fullName != null && bossTest && matchScene && !music.afterboss && !music.simulacrum;
             }).ToArray();
 
 #if DEBUG
@@ -504,7 +521,7 @@ namespace OriginalSoundTrack
             public float volume = 1f;
             public bool loop = false;
             public bool afterboss = false;
-
+            public bool simulacrum = false;
 
         }
 
