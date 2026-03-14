@@ -5,6 +5,10 @@
   <!-- Should music loop? If not true, then another song is selected from scene matches -->
   <!-- the global loop function now acts like an initializer, do not delete it though it may still break the mod -->
   <loop>false</loop>
+
+  <aftertptracks>false</aftertptracks> <!-- toggles whether an alternative track plays after finishing the main teleporter event. will play the default stage track if set to false -->
+  <silenceposttp>true</silenceposttp> <!-- when true, forces the mod to ignore "aftertptracks" and prevents normal stage tracks from playing post teleporter event (will only revert to silence after the track finishes if looping is set to false in the song definition) -->
+
   <!-- To have this plugin scan a different directory for music files,
         Uncomment <music-path> below (remove <!- - and - -> from the line below) -->
   <!-- <music-path>C:\Users\YourName\Music\SomeMusicFolder</music-path> -->
@@ -12,15 +16,13 @@
         Here is where you define what songs are used in which scenes and if they are
         "boss" music (played during teleporter events or not).
 
-        Here is an example of a file that will play on the title screen and other main menus:
-
         <song
             name="01 Risk of Rain.mp3"
             scenes="title,lobby,logbook,crystalworld,eclipseworld"
             boss="false"
             volume="1"
             loop="false" // or true depending on your use case
-            afterboss="true" // can only be used for mithrix currently, if you would like to have afterboss tracks for any boss, you will have to edit the source code of the mod
+            afterboss="true" // can only be used for mithrix and post teleporter currently. post tp tracks are disabled by default, to enable them set "aftertptracks" to true and put afterboss under the song definition.
         />
 
         "name" must match the file name exactly. Supported extensions are ".mp3" and ".wav" (case sensitive).
@@ -113,6 +115,24 @@
             boss="false"
             volume="0.85"
         />
+<!-- Post Teleporter Music-->
+        <song
+            name="PostTeleporterTrack_01.mp3"
+            scenes="blackbeach,blackbeach2,golemplains,golemplains2,snowyforest,lakes,lakesnight,village,villagenight,goolake,foggyswamp,ancientloft,nest,lemuriantemple,frozenwall,wispgraveyard,sulfurpools,ironalluvium,ironalluvium2,habitat,habitatfall,dampcavesimple,shipgraveyard,rootjungle,repurposedcrater,conduitcanyon"
+            boss="false"
+            volume="0.85"
+            loop="true"
+			afterboss="true"
+		/>
+        <song
+            name="PostTeleporterTrack_02.mp3"
+            scenes="skymeadow,helminthroost"
+            boss="false"
+            volume="0.85"
+            loop="true"
+			afterboss="true"
+		/>
+		
 <!-- Simulacrum Music -->
         <song
             name="S_01_Rallypoint.mp3"
@@ -120,6 +140,7 @@
             boss="false"
             volume="0.85"
             loop="false"
+            simulacrum="true"
         />
         <song
             name="S_01_RallypointLoop.mp3"
@@ -127,6 +148,7 @@
             boss="false"
             volume="0.85"
             loop="true"
+            simulacrum="true"
         />
         <song
             name="S_02_Aphelian.mp3"
@@ -134,6 +156,7 @@
             boss="false"
             volume="0.85"
             loop="false"
+            simulacrum="true"
         />
         <song
             name="S_02_AphelianLoop.mp3"
@@ -141,6 +164,7 @@
             boss="false"
             volume="0.85"
             loop="true"
+            simulacrum="true"
         />
         <song
             name="S_03_Abyssal.mp3"
@@ -148,6 +172,7 @@
             boss="false"
             volume="0.85"
             loop="false"
+            simulacrum="true"
         />
         <song
             name="S_03_AbyssalLoop.mp3"
@@ -155,6 +180,7 @@
             boss="false"
             volume="0.85"
             loop="true"
+            simulacrum="true"
         />
         <song
             name="S_04_TitanicPlains.mp3"
@@ -162,6 +188,7 @@
             boss="false"
             volume="0.85"
             loop="false"
+            simulacrum="true"
         />
         <song
             name="S_04_TitanicPlainsLoop.mp3"
@@ -169,6 +196,7 @@
             boss="false"
             volume="0.85"
             loop="true"
+            simulacrum="true"
         />
         <song
             name="S_05_AbandonedAqueduct.mp3"
@@ -176,6 +204,7 @@
             boss="false"
             volume="0.85"
             loop="false"
+            simulacrum="true"
         />
         <song
             name="S_05_AbandonedAqueductLoop.mp3"
@@ -183,6 +212,7 @@
             boss="false"
             volume="0.85"
             loop="true"
+            simulacrum="true"
         />
         <song
             name="S_06_SkyMeadow.mp3"
@@ -190,6 +220,7 @@
             boss="false"
             volume="0.85"
             loop="false"
+            simulacrum="true"
         />
         <song
             name="S_06_SkyMeadowLoop.mp3"
@@ -197,6 +228,7 @@
             boss="false"
             volume="0.85"
             loop="true"
+            simulacrum="true"
         />
         <song
             name="S_07_Commencement.mp3"
@@ -204,6 +236,7 @@
             boss="false"
             volume="0.70"
             loop="false"
+            simulacrum="true"
         />
         <song
             name="S_07_CommencementLoop.mp3"
@@ -211,6 +244,7 @@
             boss="false"
             volume="0.70"
             loop="true"
+            simulacrum="true"
         />
 <!-- Stage 1 Music -->
         <song
@@ -707,7 +741,7 @@
             scenes="conduitcanyon"
             boss="True"
             volume="0.85"
-            loop="false" 
+            loop="true" 
         />
 <!-- Stage 5 Music -->		
 		<song
