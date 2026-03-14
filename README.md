@@ -10,3 +10,4 @@ i probably wouldnt have made these additions if i didnt had access to it lol
 * individual loop setting for tracks
 * boss tracks for all dlc "final" bosses
 * mithrix escape track
+* a toggleable post teleporter music setting
