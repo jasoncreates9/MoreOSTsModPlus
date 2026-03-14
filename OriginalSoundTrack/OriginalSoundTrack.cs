@@ -53,6 +53,8 @@ namespace OriginalSoundTrack
         private float currentMusicVolume;
         private ConfigEntry<float> globalMusicVolume;
         private bool shouldLoop = true; // should songs loop when they end?
+        private bool postbossmusic = false;
+        private bool donothingaftertp = false;
         private string oldMusicVolume = ""; // what the music convar was before we override it.
         private string currentScene = ""; // helpful for picking out boss music.
         private System.Random rnd = new System.Random(); // helpful for picking random music.
@@ -69,6 +71,8 @@ namespace OriginalSoundTrack
         //The Awake() method is run at the very start when the game is initialized.
         public void Awake()
         {
+            TeleporterInteraction.onTeleporterChargedGlobal += OnTeleporterFinished;
+
             var pluginPath = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var musicPath = pluginPath;
 
@@ -105,6 +109,8 @@ namespace OriginalSoundTrack
 
                 //globalMusicVolume = float.Parse(settings["volume"].InnerText, CultureInfo.InvariantCulture);
                 shouldLoop = settings["loop"].InnerText.ToLower() == "true";
+                postbossmusic = settings["aftertptracks"].InnerText.ToLower() == "true";
+                donothingaftertp = settings["silenceposttp"].InnerText.ToLower() == "true";
 
                 if (settings["music-path"] != null)
                 {
@@ -186,6 +192,7 @@ namespace OriginalSoundTrack
                     PickOutMusic(true);
                 }
             };
+
 
             On.RoR2.UI.PauseScreenController.OnEnable += (orig, self) =>
             {
@@ -335,6 +342,28 @@ namespace OriginalSoundTrack
             };
         }
 
+        private void OnTeleporterFinished(TeleporterInteraction tp)
+        {
+            if (donothingaftertp)
+            {
+                Debug.Log("==================== Play Nothing Once This Song Finishes? COMING RIGHT UP!! ====================");
+                return;
+            }
+
+            if (postbossmusic)
+            {
+                Debug.Log("==================== Post Teleporter Music Enabled! ====================");
+                bossActive = false;
+                afterBossPhase = true;
+                PickOutMusic();
+            }
+            else
+            {
+                Debug.Log("==================== Post Teleporter Music DISABLED!!!!!!!! ====================");
+                bossActive = false;
+                PickOutMusic();
+            }   
+        }
 
 
         private void UpdateVolume()
