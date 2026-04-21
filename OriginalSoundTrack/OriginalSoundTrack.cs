@@ -18,6 +18,7 @@ using System.Xml;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+
 namespace OriginalSoundTrack
 {
     // The OriginalSoundTrack plugin - For replacing the in game music with Risk of Rain 1 music (or your own).
@@ -32,9 +33,11 @@ namespace OriginalSoundTrack
     //This attribute is required, and lists metadata for your plugin.
     //The GUID should be a unique ID for this plugin, which is human readable (as it is used in places like the config). I like to use the java package notation, which is "com.[your name here].[your plugin name here]"
     //The name is the name of the plugin that's displayed on load, and the version number just specifies what version the plugin is.
-    [BepInPlugin("com.mrcountermax.moreostsmod", "MoreOSTsMod", "2.0.0")]
+    [BepInPlugin("com.jasoncreatesblep.moreostsmodplus", "MoreOSTsModPlus", "2.0.0")]
     //[R2APISubmoduleDependency(nameof(NetworkingAPI))]
     [BepInDependency("com.rune580.riskofoptions")]
+    [BepInDependency("com.Viliger.EnemiesReturns", BepInDependency.DependencyFlags.SoftDependency)]
+ 
     [NetworkCompatibilityAttribute(CompatibilityLevel.NoNeedForSync, VersionStrictness.DifferentModVersionsAreOk)]
     //This is the main declaration of our plugin class. BepInEx searches for all classes inheriting from BaseUnityPlugin to initialize on startup.
     //BaseUnityPlugin itself inherits from MonoBehaviour, so you can use this as a reference for what you can declare and use in your plugin class: https://docs.unity3d.com/ScriptReference/MonoBehaviour.html
@@ -53,6 +56,8 @@ namespace OriginalSoundTrack
         private float currentMusicVolume;
         private ConfigEntry<float> globalMusicVolume;
         private bool shouldLoop = true; // should songs loop when they end?
+        private bool postbossmusic = false;
+        private bool donothingaftertp = false;
         private string oldMusicVolume = ""; // what the music convar was before we override it.
         private string currentScene = ""; // helpful for picking out boss music.
         private System.Random rnd = new System.Random(); // helpful for picking random music.
@@ -61,14 +66,16 @@ namespace OriginalSoundTrack
         private Texture2D modIconTexture;
 
         private SceneIndex lastStageIndex = SceneIndex.Invalid;
-        private bool bossActive = false; // determines whether or not the teleporter is active, also used for "final" boss fights to prevent normal tracks from playing if current boss is alive
-        private bool afterBossPhase = false; // prevents tracks without the "afterboss" tag from playing once a "final" boss is defeated basically, thats also how i fixed mithrix not having an escape theme :3
-
+        public bool bossActive = false; // determines whether or not the teleporter is active, also used for "final" boss fights to prevent normal tracks from playing if current boss is alive
+        public bool afterBossPhase = false; // prevents tracks without the "afterboss" tag from playing once a "final" boss is defeated basically, thats also how i fixed mithrix not having an escape theme :3
+        public bool simulacrumactive = false;
 
 
         //The Awake() method is run at the very start when the game is initialized.
         public void Awake()
         {
+            TeleporterInteraction.onTeleporterChargedGlobal += OnTeleporterFinished;
+
             var pluginPath = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var musicPath = pluginPath;
 
@@ -105,6 +112,8 @@ namespace OriginalSoundTrack
 
                 //globalMusicVolume = float.Parse(settings["volume"].InnerText, CultureInfo.InvariantCulture);
                 shouldLoop = settings["loop"].InnerText.ToLower() == "true";
+                postbossmusic = settings["aftertptracks"].InnerText.ToLower() == "true";
+                donothingaftertp = settings["silenceposttp"].InnerText.ToLower() == "true";
 
                 if (settings["music-path"] != null)
                 {
@@ -121,11 +130,10 @@ namespace OriginalSoundTrack
                         newMusic.scenes = GetAttribute(node, "scenes").Split(',').Select(str => str.Trim()).ToArray();
                         newMusic.boss = GetAttribute(node, "boss").ToLower() == "true";
                         newMusic.afterboss = GetAttribute(node, "afterboss").ToLower() == "true";
-                        newMusic.volume = 1f;
-                        var vol = GetAttribute(node, "volume");
-                        if (vol != "")
+                        newMusic.simulacrum = GetAttribute(node, "simulacrum").ToLower() == "true";
+                        if (float.TryParse(GetAttribute(node, "volume"), out float volume)) // friend helped me here, hes a cutie :3
                         {
-                            newMusic.volume = float.Parse(vol, CultureInfo.InvariantCulture);
+                            newMusic.volume = volume;
                         }
 
                         newMusic.loop = GetAttribute(node, "loop").ToLower() == "true";
@@ -188,6 +196,7 @@ namespace OriginalSoundTrack
                 }
             };
 
+
             On.RoR2.UI.PauseScreenController.OnEnable += (orig, self) =>
             {
                 orig(self);
@@ -208,6 +217,21 @@ namespace OriginalSoundTrack
                 }
             };
 
+            On.RoR2.InfiniteTowerRun.Start += (orig, self) =>
+            {
+                orig(self);
+                simulacrumactive = true;
+                PickOutMusic();
+            };
+
+
+            On.RoR2.InfiniteTowerRun.OnDestroy += (orig, self) =>
+            {
+                orig(self);
+                simulacrumactive = false;
+                PickOutMusic();
+            };
+
             // On.EntityStates.VoidRaidCrab.SpawnState.OnEnter
             // On.EntityStates.VoidRaidCrab.SpawnState.DeathState
             On.EntityStates.Missions.BrotherEncounter.Phase1.OnEnter += (orig, self) =>
@@ -224,7 +248,7 @@ namespace OriginalSoundTrack
                 Debug.Log("====================== MITHRIX BOSS FIGHT DONE ======================");
                 bossActive = false;
                 afterBossPhase = true;
-                PickOutMusic(); 
+                PickOutMusic();
             };
 
 
@@ -298,6 +322,30 @@ namespace OriginalSoundTrack
                 PickOutMusic(false);
             };
 
+            On.EntityStates.ArtifactShell.StartHurt.OnEnter += (orig, self) =>
+            {
+                if (!bossActive)
+                {
+                    orig(self);
+                    Debug.Log("====================== ARTIFACT TRIAL START ======================");
+                    bossActive = true;
+                    PickOutMusic(true);
+                }
+            };
+
+            On.EntityStates.ArtifactShell.Death.OnEnter += (orig, self) =>
+            {
+                orig(self);
+                Debug.Log("====================== ARTIFACT TRIAL END ======================");
+                bossActive = false;
+                PickOutMusic(false);
+            };
+           
+            if (enemiesreturnswrapper.Present)
+            {
+                enemiesreturnswrapper.Init(this);
+            }
+
             SceneManager.sceneLoaded += (scene, mode) =>
             {
                 Debug.Log("====================== CHANGE SCENE, GD REFERENCE ========================");
@@ -306,6 +354,15 @@ namespace OriginalSoundTrack
                 currentScene = scene.name;
 
                 var currentStageIndex = SceneCatalog.mostRecentSceneDef.sceneDefIndex;
+
+                if (currentScene == "enemiesreturns_judgementoutro")
+                {
+                    lastStageIndex = currentStageIndex;
+                    afterBossPhase = true;
+                    bossActive = false;
+                    PickOutMusic();
+                    return;
+                }
 
                 if (currentStageIndex != lastStageIndex)
                 {
@@ -322,6 +379,28 @@ namespace OriginalSoundTrack
             };
         }
 
+        private void OnTeleporterFinished(TeleporterInteraction tp)
+        {
+            if (donothingaftertp)
+            {
+                Debug.Log("==================== Play Nothing Once This Song Finishes? COMING RIGHT UP!! ====================");
+                return;
+            }
+
+            if (postbossmusic)
+            {
+                Debug.Log("==================== Post Teleporter Music Enabled! ====================");
+                bossActive = false;
+                afterBossPhase = true;
+                PickOutMusic();
+            }
+            else
+            {
+                Debug.Log("==================== Post Teleporter Music DISABLED!!!!!!!! ====================");
+                bossActive = false;
+                PickOutMusic();
+            }   
+        }
 
 
         private void UpdateVolume()
@@ -368,7 +447,7 @@ namespace OriginalSoundTrack
             return false;
         }
 
-        private void PickOutMusic(bool isForTeleporter = false)
+        public void PickOutMusic(bool isForTeleporter = false)
         {
             var goodMusicChoices = musics.Where(music =>
             {
@@ -378,9 +457,13 @@ namespace OriginalSoundTrack
                 {
                     return music.afterboss && matchScene && music.fullName != null;
                 }
+                if (simulacrumactive)
+                {
+                    return music.simulacrum == simulacrumactive && matchScene && music.fullName != null;
+                }
 
                 var bossTest = isForTeleporter == music.boss;
-                return music.fullName != null && bossTest && matchScene && !music.afterboss;
+                return music.fullName != null && bossTest && matchScene && !music.afterboss && !music.simulacrum;
             }).ToArray();
 
 #if DEBUG
@@ -472,6 +555,28 @@ namespace OriginalSoundTrack
             }
         }
 
+        private void FixedUpdate()
+        {
+            if (currentSong != null)
+            {
+                if (currentSong.Position >= currentSong.Length && !shouldLoop)
+                {
+                    outputDevice.Stop();
+                    currentSong.Position = currentSong.Length - 1;
+                    PickOutMusic(bossActive);
+                }
+            }
+        }
+
+        private void OnDestroy()
+        {
+            var convar = RoR2.Console.instance.FindConVar("volume_music");
+            if (convar != null)
+            {
+                convar.SetString(oldMusicVolume);
+            }
+        }
+
 
         public class Music
         {
@@ -482,7 +587,7 @@ namespace OriginalSoundTrack
             public float volume = 1f;
             public bool loop = false;
             public bool afterboss = false;
-
+            public bool simulacrum = false;
 
         }
 
@@ -533,6 +638,8 @@ namespace OriginalSoundTrack
                 }
                 return read;
             }
+
         }
     }
 }
+
