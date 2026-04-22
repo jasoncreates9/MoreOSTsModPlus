@@ -10,6 +10,6 @@ i probably wouldnt have made these additions if i didnt had access to it lol
 * individual loop setting for tracks
 * boss tracks for all dlc "final" bosses
 * mithrix escape track
-* post boss tracks
-* bulwarks artifact trial track
-* support for the judgement arena in "enemiesreturns"
+* a toggleable post-teleporter music setting within the xml config
+* bulwarks now has a seperate track for the artifact trial
+* support for enemiesreturns's judgement stage has been added
