@@ -56,11 +56,27 @@ namespace OriginalSoundTrack
         private float currentMusicVolume;
         private ConfigEntry<float> globalMusicVolume;
         private bool shouldLoop = true; // should songs loop when they end?
-        private bool postbossmusic = false;
-        private bool donothingaftertp = false;
+        public bool hasshuffled = false;
         private string oldMusicVolume = ""; // what the music convar was before we override it.
         private string currentScene = ""; // helpful for picking out boss music.
         private System.Random rnd = new System.Random(); // helpful for picking random music.
+
+
+        private postbossmusicmode postbossmusic = 0;
+        private randomizationmodelist randomizationmode = 0;
+        private enum postbossmusicmode
+        {
+            silence,
+            alttrack,   
+            normaltrack
+        }
+        private enum randomizationmodelist
+        {
+            off,
+            shuffle,
+            shuffleonce
+        }
+
         private XmlElement settings; // settings data.
 
         private Texture2D modIconTexture;
@@ -112,8 +128,12 @@ namespace OriginalSoundTrack
 
                 //globalMusicVolume = float.Parse(settings["volume"].InnerText, CultureInfo.InvariantCulture);
                 shouldLoop = settings["loop"].InnerText.ToLower() == "true";
-                postbossmusic = settings["aftertptracks"].InnerText.ToLower() == "true";
-                donothingaftertp = settings["silenceposttp"].InnerText.ToLower() == "true";
+
+                if (Enum.TryParse(settings["aftertptracks"].InnerText, true, out postbossmusicmode posttpbehavior))
+                    postbossmusic = posttpbehavior;
+
+                if (Enum.TryParse(settings["randomization"].InnerText, true, out randomizationmodelist randombehavior))
+                    randomizationmode = randombehavior;
 
                 if (settings["music-path"] != null)
                 {
@@ -131,7 +151,7 @@ namespace OriginalSoundTrack
                         newMusic.boss = GetAttribute(node, "boss").ToLower() == "true";
                         newMusic.afterboss = GetAttribute(node, "afterboss").ToLower() == "true";
                         newMusic.simulacrum = GetAttribute(node, "simulacrum").ToLower() == "true";
-                        if (float.TryParse(GetAttribute(node, "volume"), out float volume)) // friend helped me here, hes a cutie :3
+                        if (float.TryParse(GetAttribute(node, "volume"), out float volume)) // friend helped me here :3
                         {
                             newMusic.volume = volume;
                         }
@@ -182,6 +202,8 @@ namespace OriginalSoundTrack
                 if (!bossActive)
                 {
                     bossActive = true;
+                    hasshuffled = false;
+                    listtracker = 0;
                     PickOutMusic(true);
                 }
             };
@@ -192,6 +214,8 @@ namespace OriginalSoundTrack
                 if (!bossActive)
                 {
                     bossActive = true;
+                    hasshuffled = false;
+                    listtracker = 0;
                     PickOutMusic(true);
                 }
             };
@@ -221,6 +245,8 @@ namespace OriginalSoundTrack
             {
                 orig(self);
                 simulacrumactive = true;
+                hasshuffled = false;
+                listtracker = 0;
                 PickOutMusic();
             };
 
@@ -229,6 +255,8 @@ namespace OriginalSoundTrack
             {
                 orig(self);
                 simulacrumactive = false;
+                hasshuffled = false;
+                listtracker = 0;
                 PickOutMusic();
             };
 
@@ -239,6 +267,8 @@ namespace OriginalSoundTrack
                 orig(self);
                 Debug.Log("====================== MITHRIX BOSS FIGHT START ======================");
                 bossActive = true;
+                hasshuffled = false;
+                listtracker = 0;
                 PickOutMusic(true);
             };
 
@@ -248,6 +278,8 @@ namespace OriginalSoundTrack
                 Debug.Log("====================== MITHRIX BOSS FIGHT DONE ======================");
                 bossActive = false;
                 afterBossPhase = true;
+                hasshuffled = false;
+                listtracker = 0;
                 PickOutMusic();
             };
 
@@ -257,6 +289,8 @@ namespace OriginalSoundTrack
                 orig(self);
                 Debug.Log("====================== FALSE SON BOSS FIGHT START ======================");
                 bossActive = true;
+                hasshuffled = false;
+                listtracker = 0;
                 PickOutMusic(true);
             };
 
@@ -265,6 +299,8 @@ namespace OriginalSoundTrack
                 orig(self);
                 Debug.Log("====================== FALSE SON BOSS FIGHT DONE ======================");
                 bossActive = false;
+                hasshuffled = false;
+                listtracker = 0;
                 PickOutMusic(false);
             };
 
@@ -275,6 +311,8 @@ namespace OriginalSoundTrack
                 orig(self);
                 Debug.Log("====================== SOLUS HEART BOSS FIGHT START ======================");
                 bossActive = true;
+                hasshuffled = false;
+                listtracker = 0;
                 PickOutMusic(true);
             };
 
@@ -283,6 +321,8 @@ namespace OriginalSoundTrack
                 orig(self);
                 Debug.Log("====================== SOLUS HEART BOSS FIGHT DONE ======================");
                 bossActive = false;
+                hasshuffled = false;
+                listtracker = 0;
                 PickOutMusic(false);
             };
 
@@ -292,6 +332,8 @@ namespace OriginalSoundTrack
                 orig(self);
                 Debug.Log("====================== SOLUS WING BOSS FIGHT START ======================");
                 bossActive = true;
+                hasshuffled = false;
+                listtracker = 0;
                 PickOutMusic(true);
             };
 
@@ -300,6 +342,8 @@ namespace OriginalSoundTrack
                 orig(self);
                 Debug.Log("====================== SOLUS WING BOSS FIGHT DONE ======================");
                 bossActive = false;
+                hasshuffled = false;
+                listtracker = 0;
                 PickOutMusic(false);
             };
 
@@ -310,6 +354,8 @@ namespace OriginalSoundTrack
                     orig(self);
                     Debug.Log("====================== VOIDLING BOSS FIGHT START ======================");
                     bossActive = true;
+                    hasshuffled = false;
+                    listtracker = 0;
                     PickOutMusic(true);
                 }
             };
@@ -319,6 +365,8 @@ namespace OriginalSoundTrack
                 orig(self);
                 Debug.Log("====================== VOIDLING BOSS FIGHT DONE ======================");
                 bossActive = false;
+                hasshuffled = false;
+                listtracker = 0;
                 PickOutMusic(false);
             };
 
@@ -329,6 +377,8 @@ namespace OriginalSoundTrack
                     orig(self);
                     Debug.Log("====================== ARTIFACT TRIAL START ======================");
                     bossActive = true;
+                    hasshuffled = false;
+                    listtracker = 0;
                     PickOutMusic(true);
                 }
             };
@@ -338,6 +388,8 @@ namespace OriginalSoundTrack
                 orig(self);
                 Debug.Log("====================== ARTIFACT TRIAL END ======================");
                 bossActive = false;
+                hasshuffled = false;
+                listtracker = 0;
                 PickOutMusic(false);
             };
            
@@ -360,6 +412,8 @@ namespace OriginalSoundTrack
                     lastStageIndex = currentStageIndex;
                     afterBossPhase = true;
                     bossActive = false;
+                    hasshuffled = false;
+                    listtracker = 0;
                     PickOutMusic();
                     return;
                 }
@@ -369,37 +423,47 @@ namespace OriginalSoundTrack
                     lastStageIndex = currentStageIndex;
                     afterBossPhase = false;
                     bossActive = false;
+                    hasshuffled = false;
+                    listtracker = 0;
                     PickOutMusic();
                 }
                 else
                 {
                     if (!bossActive)
+                    {
+                        hasshuffled = false;
+                        listtracker = 0;
                         PickOutMusic();
+                    }
                 }
             };
         }
 
         private void OnTeleporterFinished(TeleporterInteraction tp)
         {
-            if (donothingaftertp)
+            switch (postbossmusic)
             {
-                Debug.Log("==================== Play Nothing Once This Song Finishes? COMING RIGHT UP!! ====================");
-                return;
-            }
+                case postbossmusicmode.silence:
+                    Debug.Log("==================== Play Nothing Once This Song Finishes? COMING RIGHT UP!! ====================");
+                break;
 
-            if (postbossmusic)
-            {
-                Debug.Log("==================== Post Teleporter Music Enabled! ====================");
-                bossActive = false;
-                afterBossPhase = true;
-                PickOutMusic();
+                case postbossmusicmode.alttrack:
+                    Debug.Log("==================== Alt Stage Track Post-Tp ENABLED!!!!!!!!!!!! ====================");
+                    bossActive = false;
+                    afterBossPhase = true;
+                    hasshuffled = false;
+                    listtracker = 0;
+                    PickOutMusic();
+                break;
+
+                case postbossmusicmode.normaltrack:
+                    Debug.Log("==================== Normal Stage Track Post-Tp ENABLED!!!!!!!!!!!! ====================");
+                    bossActive = false;
+                    hasshuffled = false;
+                    listtracker = 0;
+                    PickOutMusic();
+                break;
             }
-            else
-            {
-                Debug.Log("==================== Post Teleporter Music DISABLED!!!!!!!! ====================");
-                bossActive = false;
-                PickOutMusic();
-            }   
         }
 
 
@@ -447,6 +511,7 @@ namespace OriginalSoundTrack
             return false;
         }
 
+        public int listtracker = 0;
         public void PickOutMusic(bool isForTeleporter = false)
         {
             var goodMusicChoices = musics.Where(music =>
@@ -484,16 +549,47 @@ namespace OriginalSoundTrack
 
             if (goodMusicChoices.Length > 0)
             {
+   
                 while (randFile == currentSongFullName && tries < 10)
                 {
-                    randMusic = goodMusicChoices[rnd.Next(goodMusicChoices.Length)];
-                    randFile = randMusic.fullName;
-                    tries++;
+                    switch (randomizationmode)
+                    {
+                        case randomizationmodelist.off:
+                            randMusic = goodMusicChoices[listtracker % goodMusicChoices.Length];
+                            randFile = randMusic.fullName;
+                            tries++;
+                            listtracker++;
+                        break;
+
+                        case randomizationmodelist.shuffle:
+                            randMusic = goodMusicChoices[rnd.Next(goodMusicChoices.Length)];
+                            randFile = randMusic.fullName;
+                            tries++;
+                            hasshuffled = true;
+                        break;
+
+                        case randomizationmodelist.shuffleonce:
+                            if (!hasshuffled)
+                            {
+                                listtracker = rnd.Next(goodMusicChoices.Length);
+                                randMusic = goodMusicChoices[listtracker % goodMusicChoices.Length];
+                                randFile = randMusic.fullName;
+                                tries++;
+                                hasshuffled = true;
+                            }
+                            else
+                            {
+                                randMusic = goodMusicChoices[listtracker % goodMusicChoices.Length];
+                                randFile = randMusic.fullName;
+                                tries++;
+                                listtracker++;
+                            }
+                        break;
+                    }
                 }
                 StartCoroutine(PlayMusic(randFile, randMusic.volume));
                 return;
             }
-
 #if DEBUG
             Debug.Log("======= MUSIC PICK FAILED! =======");
             Debug.Log("choosing random song...");

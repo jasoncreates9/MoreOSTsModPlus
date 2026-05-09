@@ -13,3 +13,4 @@ i probably wouldnt have made these additions if i didnt had access to it lol
 * a toggleable post-teleporter music setting within the xml config
 * bulwarks now has a seperate track for the artifact trial
 * support for enemiesreturns's judgement stage has been added
+* a toggleable song randomization within the xml config

@@ -47,6 +47,8 @@ namespace OriginalSoundTrack
                 Debug.Log("====================== JUDGEMENT BOSS FIGHT START ======================");
                 ostplugin.bossActive = false;
                 ostplugin.afterBossPhase = true;
+                ostplugin.hasshuffled = false;
+                ostplugin.listtracker = 0;
                 ostplugin.PickOutMusic(false);
 
         }
@@ -59,6 +61,8 @@ namespace OriginalSoundTrack
             {
                 Debug.Log("====================== JUDGEMENT TRIAl START ======================");
                 ostplugin.bossActive = true;
+                ostplugin.hasshuffled = false;
+                ostplugin.listtracker = 0;
                 ostplugin.PickOutMusic(true);
             }
 

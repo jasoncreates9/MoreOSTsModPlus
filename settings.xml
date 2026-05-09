@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <settings>
   <!-- Master volume is moved to the config file, this line does absolutely nothing -->
   <volume>0.4</volume>
@@ -6,8 +6,19 @@
   <!-- the global loop function now acts like an initializer, do not delete it though it may still break the mod -->
   <loop>false</loop>
 
-  <aftertptracks>false</aftertptracks> <!-- toggles whether an alternative track plays after finishing the main teleporter event. will play the default stage track if set to false -->
-  <silenceposttp>true</silenceposttp> <!-- when true, forces the mod to ignore "aftertptracks" and prevents normal stage tracks from playing post teleporter event (will only revert to silence after the track finishes if looping is set to false in the song definition) -->
+  <aftertptracks>silence</aftertptracks> <!-- this setting determines what happens after a teleporter has been fully charged -->
+  <!-- aftertptracks settings
+  "silence" // will revert to silence if the only boss track available has "loop" set to false, otherwise does nothing if more than one are present.
+  "alttrack" // plays an alternative track after the teleporter finishes charging.
+  "normaltrack" // goes back to the normal stage track after the teleporter finishes charging.
+  -->
+
+  <randomization>off</randomization> <!-- changes the randomization behavior of the mod depending on what you set here -->
+  <!-- randomization settings
+  "off" // will keep going down the list until it reaches the end, and then loops back to the beginning. (song names affect the order in which they play)
+  "shuffle" // plays a random song from the track list every time.
+  "shuffleonce" // picks a random song first and then continously goes down the list and loops back.
+  --> 
 
   <!-- To have this plugin scan a different directory for music files,
         Uncomment <music-path> below (remove <!- - and - -> from the line below) -->
