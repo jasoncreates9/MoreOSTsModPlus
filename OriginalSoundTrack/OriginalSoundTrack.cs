@@ -151,7 +151,7 @@ namespace OriginalSoundTrack
                         newMusic.boss = GetAttribute(node, "boss").ToLower() == "true";
                         newMusic.afterboss = GetAttribute(node, "afterboss").ToLower() == "true";
                         newMusic.simulacrum = GetAttribute(node, "simulacrum").ToLower() == "true";
-                        if (float.TryParse(GetAttribute(node, "volume"), out float volume)) // friend helped me here :3
+                        if (float.TryParse(GetAttribute(node, "volume"), NumberStyles.Any, CultureInfo.InvariantCulture , out float volume)) // friend helped me here :3
                         {
                             newMusic.volume = volume;
                         }
@@ -262,6 +262,9 @@ namespace OriginalSoundTrack
 
             // On.EntityStates.VoidRaidCrab.SpawnState.OnEnter
             // On.EntityStates.VoidRaidCrab.SpawnState.DeathState
+
+            // if (RoR2.Run.instance.loopClearCount > 0) // detects when the player loops (isnt in use for now)
+
             On.EntityStates.Missions.BrotherEncounter.Phase1.OnEnter += (orig, self) =>
             {
                 orig(self);
@@ -510,6 +513,7 @@ namespace OriginalSoundTrack
             }
             return false;
         }
+
 
         public int listtracker = 0;
         public void PickOutMusic(bool isForTeleporter = false)
