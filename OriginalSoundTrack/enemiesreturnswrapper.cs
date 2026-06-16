@@ -44,12 +44,14 @@ namespace OriginalSoundTrack
         [HarmonyPostfix]
         static void PatchOnEnter()
         {
-                Debug.Log("====================== JUDGEMENT BOSS FIGHT START ======================");
-                ostplugin.bossActive = false;
-                ostplugin.afterBossPhase = true;
-                ostplugin.hasshuffled = false;
-                ostplugin.listtracker = 0;
-                ostplugin.PickOutMusic(false);
+            Debug.Log("====================== JUDGEMENT BOSS FIGHT START ======================");
+            ostplugin.extratracksfrfr = false;
+            ostplugin.bossActive = false;
+            ostplugin.afterBossPhase = true;
+            ostplugin.hasshuffled = false;
+            ostplugin.listtracker = 0;
+            ostplugin.JudgementWaveCounter = 0;
+            ostplugin.PickOutMusic(false);
 
         }
 
@@ -57,6 +59,8 @@ namespace OriginalSoundTrack
         [HarmonyPostfix]
         static void PatchOnEnter2()
         {
+            ostplugin.JudgementWaveCounter += 1;
+
             if (!ostplugin.bossActive)
             {
                 Debug.Log("====================== JUDGEMENT TRIAl START ======================");
@@ -66,9 +70,15 @@ namespace OriginalSoundTrack
                 ostplugin.PickOutMusic(true);
             }
 
+            if (ostplugin.JudgementWaveCounter == 5 && ostplugin.extratracksenabled)
+            {
+                Debug.Log("====================== LAST 2 WAVES REMAINING ======================");
+                ostplugin.extratracksfrfr = true;
+                ostplugin.bossActive = true;
+                ostplugin.hasshuffled = false;
+                ostplugin.listtracker = 0;
+                ostplugin.PickOutMusic(true);
+            }
         }
-
-
-
     }
 }

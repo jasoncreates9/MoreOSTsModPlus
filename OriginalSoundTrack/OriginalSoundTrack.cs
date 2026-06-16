@@ -17,6 +17,7 @@ using System.Reflection;
 using System.Xml;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using static UnityEngine.ResourceManagement.ResourceProviders.SceneProvider;
 
 
 namespace OriginalSoundTrack
@@ -85,6 +86,12 @@ namespace OriginalSoundTrack
         public bool bossActive = false; // determines whether or not the teleporter is active, also used for "final" boss fights to prevent normal tracks from playing if current boss is alive
         public bool afterBossPhase = false; // prevents tracks without the "afterboss" tag from playing once a "final" boss is defeated basically, thats also how i fixed mithrix not having an escape theme :3
         public bool simulacrumactive = false;
+        public bool playerhaslooped = false;
+        private string[] storedloopstages = null;
+        private int postloopamount = 0;
+        public bool extratracksenabled = false;
+        public bool extratracksfrfr = false;
+        public int JudgementWaveCounter = 0;
 
 
         //The Awake() method is run at the very start when the game is initialized.
@@ -129,6 +136,9 @@ namespace OriginalSoundTrack
                 //globalMusicVolume = float.Parse(settings["volume"].InnerText, CultureInfo.InvariantCulture);
                 shouldLoop = settings["loop"].InnerText.ToLower() == "true";
 
+                if (bool.TryParse(settings["playextratracks"].InnerText, out bool extratracksbehavior))
+                    extratracksenabled = extratracksbehavior;
+
                 if (Enum.TryParse(settings["aftertptracks"].InnerText, true, out postbossmusicmode posttpbehavior))
                     postbossmusic = posttpbehavior;
 
@@ -141,6 +151,19 @@ namespace OriginalSoundTrack
                 }
                 soundFiles = SearchForAudioFiles(musicPath);
 
+                foreach (XmlNode nodeuwu in settings)
+                {
+                    if (nodeuwu.Name == "postloopstagetracksettings")
+                    {
+                        storedloopstages = settings["postloopstagetracksettings"].GetAttribute("loopscenes").Split(',');
+                        if (int.TryParse(settings["postloopstagetracksettings"].GetAttribute("enableatloop"), out int loopamountxml))
+                        {
+                            postloopamount = loopamountxml;
+                        }
+
+                    }
+                }
+
                 foreach (XmlNode node in settings["music"].ChildNodes)
                 {
                     if (node.NodeType != XmlNodeType.Comment)
@@ -151,6 +174,9 @@ namespace OriginalSoundTrack
                         newMusic.boss = GetAttribute(node, "boss").ToLower() == "true";
                         newMusic.afterboss = GetAttribute(node, "afterboss").ToLower() == "true";
                         newMusic.simulacrum = GetAttribute(node, "simulacrum").ToLower() == "true";
+                        newMusic.postloopvariant = GetAttribute(node, "postloopvariant").ToLower() == "true";
+                        newMusic.isextratrack = GetAttribute(node, "isextratrack").ToLower() == "true";
+
                         if (float.TryParse(GetAttribute(node, "volume"), NumberStyles.Any, CultureInfo.InvariantCulture , out float volume)) // friend helped me here :3
                         {
                             newMusic.volume = volume;
@@ -263,7 +289,7 @@ namespace OriginalSoundTrack
             // On.EntityStates.VoidRaidCrab.SpawnState.OnEnter
             // On.EntityStates.VoidRaidCrab.SpawnState.DeathState
 
-            // if (RoR2.Run.instance.loopClearCount > 0) // detects when the player loops (isnt in use for now)
+           
 
             On.EntityStates.Missions.BrotherEncounter.Phase1.OnEnter += (orig, self) =>
             {
@@ -375,25 +401,30 @@ namespace OriginalSoundTrack
 
             On.EntityStates.ArtifactShell.StartHurt.OnEnter += (orig, self) =>
             {
-                if (!bossActive)
+                if (extratracksenabled)
                 {
                     orig(self);
                     Debug.Log("====================== ARTIFACT TRIAL START ======================");
-                    bossActive = true;
+                    extratracksfrfr = true;
+                    bossActive = false;
                     hasshuffled = false;
                     listtracker = 0;
-                    PickOutMusic(true);
+                    PickOutMusic(false);
                 }
             };
 
             On.EntityStates.ArtifactShell.Death.OnEnter += (orig, self) =>
             {
-                orig(self);
-                Debug.Log("====================== ARTIFACT TRIAL END ======================");
-                bossActive = false;
-                hasshuffled = false;
-                listtracker = 0;
-                PickOutMusic(false);
+                if (extratracksenabled)
+                {
+                    orig(self);
+                    Debug.Log("====================== ARTIFACT TRIAL END ======================");
+                    extratracksfrfr = false;
+                    bossActive = false;
+                    hasshuffled = false;
+                    listtracker = 0;
+                    PickOutMusic(false);
+                }
             };
            
             if (enemiesreturnswrapper.Present)
@@ -412,30 +443,41 @@ namespace OriginalSoundTrack
 
                 if (currentScene == "enemiesreturns_judgementoutro")
                 {
+                    extratracksfrfr = false;
                     lastStageIndex = currentStageIndex;
                     afterBossPhase = true;
                     bossActive = false;
                     hasshuffled = false;
                     listtracker = 0;
+                    JudgementWaveCounter = 0;
                     PickOutMusic();
                     return;
                 }
 
                 if (currentStageIndex != lastStageIndex)
                 {
+                    if (RoR2.Run.instance != null)
+                    {
+                        playerhaslooped = RoR2.Run.instance.loopClearCount >= postloopamount;
+                    }
+
                     lastStageIndex = currentStageIndex;
                     afterBossPhase = false;
+                    extratracksfrfr = false;
                     bossActive = false;
                     hasshuffled = false;
                     listtracker = 0;
-                    PickOutMusic();
+                    JudgementWaveCounter = 0;
+                    PickOutMusic(); 
                 }
                 else
                 {
                     if (!bossActive)
                     {
+                        extratracksfrfr = false;
                         hasshuffled = false;
                         listtracker = 0;
+                        JudgementWaveCounter = 0;
                         PickOutMusic();
                     }
                 }
@@ -506,7 +548,7 @@ namespace OriginalSoundTrack
             // this handles scenes that can have numbers on the end.
             foreach (var scene in scenes)
             {
-                if (currentScene.Contains(scene))
+                if (currentScene.Contains(scene)) // tbh the main reason why normal songs get added to loop stages (not gonna remove it thoughhhhh)
                 {
                     return true;
                 }
@@ -520,19 +562,26 @@ namespace OriginalSoundTrack
         {
             var goodMusicChoices = musics.Where(music =>
             {
+
                 bool matchScene = sceneMostlyMatches(music.scenes);
 
-                if (afterBossPhase)
-                {
-                    return music.afterboss && matchScene && music.fullName != null;
-                }
+                var bossTest = isForTeleporter == music.boss;
+
+                var postloopmusicuwu = playerhaslooped && storedloopstages != null && storedloopstages.Contains(currentScene);
+
+                var extratrackstempvar = extratracksfrfr;
+
                 if (simulacrumactive)
                 {
                     return music.simulacrum == simulacrumactive && matchScene && music.fullName != null;
                 }
 
-                var bossTest = isForTeleporter == music.boss;
-                return music.fullName != null && bossTest && matchScene && !music.afterboss && !music.simulacrum;
+                if (afterBossPhase)
+                {
+                    return music.afterboss && matchScene && music.postloopvariant == postloopmusicuwu && music.fullName != null;
+                }
+
+                return music.fullName != null && bossTest && matchScene && music.postloopvariant == postloopmusicuwu && music.isextratrack == extratrackstempvar && !music.afterboss && !music.simulacrum;
             }).ToArray();
 
 #if DEBUG
@@ -688,7 +737,8 @@ namespace OriginalSoundTrack
             public bool loop = false;
             public bool afterboss = false;
             public bool simulacrum = false;
-
+            public bool postloopvariant = false;
+            public bool isextratrack = false;
         }
 
         public class LoopStream : WaveStream
@@ -718,7 +768,7 @@ namespace OriginalSoundTrack
             {
                 get { return sourceStream.Length; }
             }
-
+            
             public override int Read(byte[] buffer, int offset, int count)
             {
                 int read = 0;
