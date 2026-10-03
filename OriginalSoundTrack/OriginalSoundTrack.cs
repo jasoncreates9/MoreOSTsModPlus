@@ -1,5 +1,6 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
+using FathomlessVoidling.Controllers;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using R2API.Networking;
@@ -38,7 +39,8 @@ namespace OriginalSoundTrack
     //[R2APISubmoduleDependency(nameof(NetworkingAPI))]
     [BepInDependency("com.rune580.riskofoptions")]
     [BepInDependency("com.Viliger.EnemiesReturns", BepInDependency.DependencyFlags.SoftDependency)]
- 
+    [BepInDependency("Nuxlar.FathomlessVoidling", BepInDependency.DependencyFlags.SoftDependency)]
+
     [NetworkCompatibilityAttribute(CompatibilityLevel.NoNeedForSync, VersionStrictness.DifferentModVersionsAreOk)]
     //This is the main declaration of our plugin class. BepInEx searches for all classes inheriting from BaseUnityPlugin to initialize on startup.
     //BaseUnityPlugin itself inherits from MonoBehaviour, so you can use this as a reference for what you can declare and use in your plugin class: https://docs.unity3d.com/ScriptReference/MonoBehaviour.html
@@ -413,6 +415,8 @@ namespace OriginalSoundTrack
                 }
             };
 
+           
+
             On.EntityStates.ArtifactShell.Death.OnEnter += (orig, self) =>
             {
                 if (extratracksenabled)
@@ -430,6 +434,11 @@ namespace OriginalSoundTrack
             if (enemiesreturnswrapper.Present)
             {
                 enemiesreturnswrapper.Init(this);
+            }
+
+            if (fathomlesswrapper.Present2)
+            {
+                fathomlesswrapper.Init2(this);
             }
 
             SceneManager.sceneLoaded += (scene, mode) =>
