@@ -14,8 +14,10 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Xml;
+using TagLib;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using static UnityEngine.ResourceManagement.ResourceProviders.SceneProvider;
@@ -58,6 +60,7 @@ namespace OriginalSoundTrack
         //private float globalMusicVolume = 0.5f; // default global music volume.
         private float currentMusicVolume;
         private ConfigEntry<float> globalMusicVolume;
+        private ConfigEntry<bool> EnableMetaData;
         private bool shouldLoop = true; // should songs loop when they end?
         public bool hasshuffled = false;
         private string oldMusicVolume = ""; // what the music convar was before we override it.
@@ -88,12 +91,20 @@ namespace OriginalSoundTrack
         public bool bossActive = false; // determines whether or not the teleporter is active, also used for "final" boss fights to prevent normal tracks from playing if current boss is alive
         public bool afterBossPhase = false; // prevents tracks without the "afterboss" tag from playing once a "final" boss is defeated basically, thats also how i fixed mithrix not having an escape theme :3
         public bool simulacrumactive = false;
+        public bool playanimamusic = false; // oh wow if it isnt another boss boolean
         public bool playerhaslooped = false;
         private string[] storedloopstages = null;
         private int postloopamount = 0;
-        public bool extratracksenabled = false;
+
         public bool extratracksfrfr = false;
         public int JudgementWaveCounter = 0;
+
+        public bool artifactmusicenabled = false;
+        public bool judgementfinalwavesenabled = false;
+        public bool soultrialstrackenabled = false;
+        public bool karmicmithrixtrackenabled = false;
+        public bool winnowingreckoningenabled = false;
+        public bool mithrixaltoutro = false;
 
 
         //The Awake() method is run at the very start when the game is initialized.
@@ -105,6 +116,7 @@ namespace OriginalSoundTrack
             var musicPath = pluginPath;
 
             globalMusicVolume = Config.Bind(new ConfigDefinition("General", "Volume"), 40f, new ConfigDescription("The volume of the More OSTs Mod music. KEEP THE GAME'S MUSIC VOLUME AT 0!!!", new AcceptableValueRange<float>(0, 100)));
+
             ModSettingsManager.AddOption(new StepSliderOption(globalMusicVolume, new StepSliderConfig
             {
                 min = 0f,
@@ -115,6 +127,9 @@ namespace OriginalSoundTrack
 
             globalMusicVolume.SettingChanged += (_, __) => UpdateVolume();
 
+            EnableMetaData = Config.Bind(new ConfigDefinition("General", "Display Metadata"), true, new ConfigDescription("toggles whether the current song's title and artist will display in chat", new AcceptableValueRange<bool>(false, true)));
+
+            ModSettingsManager.AddOption(new CheckBoxOption(EnableMetaData));
 
             modIconTexture = new Texture2D(0, 0);
 
@@ -138,9 +153,6 @@ namespace OriginalSoundTrack
                 //globalMusicVolume = float.Parse(settings["volume"].InnerText, CultureInfo.InvariantCulture);
                 shouldLoop = settings["loop"].InnerText.ToLower() == "true";
 
-                if (bool.TryParse(settings["playextratracks"].InnerText, out bool extratracksbehavior))
-                    extratracksenabled = extratracksbehavior;
-
                 if (Enum.TryParse(settings["aftertptracks"].InnerText, true, out postbossmusicmode posttpbehavior))
                     postbossmusic = posttpbehavior;
 
@@ -157,11 +169,30 @@ namespace OriginalSoundTrack
                 {
                     if (nodeuwu.Name == "postloopstagetracksettings")
                     {
-                        storedloopstages = settings["postloopstagetracksettings"].GetAttribute("loopscenes").Split(',');
+                        storedloopstages = settings["postloopstagetracksettings"].GetAttribute("loopscenes").Split(',').Select(str => str.Trim()).ToArray();
                         if (int.TryParse(settings["postloopstagetracksettings"].GetAttribute("enableatloop"), out int loopamountxml))
                         {
                             postloopamount = loopamountxml;
                         }
+
+                    }
+
+                    if (nodeuwu.Name == "extratracksettings")
+                    {
+                        if (bool.TryParse(settings["extratracksettings"].GetAttribute("artifacttrialmusic"), out bool playartifactmusic))
+                            artifactmusicenabled = playartifactmusic;
+                    
+                        if (bool.TryParse(settings["extratracksettings"].GetAttribute("judgementwave5track"), out bool playextrajudgement))
+                            judgementfinalwavesenabled = playextrajudgement;
+
+                        if (bool.TryParse(settings["extratracksettings"].GetAttribute("soultrialtptrack"), out bool playsoultrialtrack))
+                            soultrialstrackenabled = playsoultrialtrack;
+                        
+                        if (bool.TryParse(settings["extratracksettings"].GetAttribute("karma8mithrixtrack"), out bool playkarma8mithrixtrack))
+                            karmicmithrixtrackenabled = playkarma8mithrixtrack;
+
+                        if (bool.TryParse(settings["extratracksettings"].GetAttribute("winnowingreckoning"), out bool playwinnowingreckoning))
+                            winnowingreckoningenabled = playwinnowingreckoning;
 
                     }
                 }
@@ -178,6 +209,7 @@ namespace OriginalSoundTrack
                         newMusic.simulacrum = GetAttribute(node, "simulacrum").ToLower() == "true";
                         newMusic.postloopvariant = GetAttribute(node, "postloopvariant").ToLower() == "true";
                         newMusic.isextratrack = GetAttribute(node, "isextratrack").ToLower() == "true";
+                        newMusic.soulboundboss = GetAttribute(node, "soulboundboss").ToLower().Equals("true");
 
                         if (float.TryParse(GetAttribute(node, "volume"), NumberStyles.Any, CultureInfo.InvariantCulture , out float volume)) // friend helped me here :3
                         {
@@ -248,6 +280,20 @@ namespace OriginalSoundTrack
                 }
             };
 
+            On.EntityStates.TeleporterCatastrophe.DLC4.Teleporter.OverchargingInterludeState.OnEnter += (orig, self) =>
+            {
+                orig(self);
+
+                if (bossActive && soultrialstrackenabled)
+                {
+                    Debug.Log("====================== OVERCHARGING THE TELEPORTER!!! ======================");
+                    bossActive = true; 
+                    extratracksfrfr = true;
+                    hasshuffled = false;
+                    listtracker = 0;
+                    PickOutMusic(true);
+                }
+            };
 
             On.RoR2.UI.PauseScreenController.OnEnable += (orig, self) =>
             {
@@ -296,11 +342,25 @@ namespace OriginalSoundTrack
             On.EntityStates.Missions.BrotherEncounter.Phase1.OnEnter += (orig, self) =>
             {
                 orig(self);
-                Debug.Log("====================== MITHRIX BOSS FIGHT START ======================");
-                bossActive = true;
-                hasshuffled = false;
-                listtracker = 0;
-                PickOutMusic(true);
+                if (KarmaManager.instance.GetEffectiveKarma() == 8 && karmicmithrixtrackenabled)
+                {
+                    
+                    Debug.Log("====================== KARMIC MITHRIX START ======================");
+                    bossActive = true;
+                    extratracksfrfr = true;
+                    mithrixaltoutro = true;
+                    hasshuffled = false;
+                    listtracker = 0;
+                    PickOutMusic(true);
+                }
+                else
+                {
+                    Debug.Log("====================== MITHRIX BOSS FIGHT START ======================");
+                    bossActive = true;
+                    hasshuffled = false;
+                    listtracker = 0;
+                    PickOutMusic(true);
+                }
             };
 
             On.EntityStates.Missions.BrotherEncounter.EncounterFinished.OnEnter += (orig, self) =>
@@ -403,7 +463,7 @@ namespace OriginalSoundTrack
 
             On.EntityStates.ArtifactShell.StartHurt.OnEnter += (orig, self) =>
             {
-                if (extratracksenabled)
+                if (artifactmusicenabled)
                 {
                     orig(self);
                     Debug.Log("====================== ARTIFACT TRIAL START ======================");
@@ -419,7 +479,7 @@ namespace OriginalSoundTrack
 
             On.EntityStates.ArtifactShell.Death.OnEnter += (orig, self) =>
             {
-                if (extratracksenabled)
+                if (artifactmusicenabled)
                 {
                     orig(self);
                     Debug.Log("====================== ARTIFACT TRIAL END ======================");
@@ -430,7 +490,95 @@ namespace OriginalSoundTrack
                     PickOutMusic(false);
                 }
             };
-           
+
+            On.EntityStates.Missions.ChampRush.StartChampRush.OnEnter += (orig, self) =>
+            {
+                orig(self);
+                Debug.Log("====================== SOULBOUND TRIAL START ======================");
+                bossActive = true;
+                hasshuffled = false;
+                listtracker = 0;
+                PickOutMusic(true);
+            };
+
+            On.EntityStates.Missions.ChampRush.ReaperFight.OnEnter += (orig, self) =>
+            {
+                if (!playanimamusic)
+                {
+                    orig(self);
+                    Debug.Log("====================== ANIMA HARVESTER BOSS START ======================");
+                    bossActive = true;
+                    playanimamusic = true;
+                    hasshuffled = false;
+                    listtracker = 0;
+                    PickOutMusic(true);
+                }
+            };
+
+            On.EntityStates.Missions.ChampRush.Aftermath.OnEnter += (orig, self) =>
+            {
+                orig(self);
+                Debug.Log("====================== SOULBOUND TRIAL END ======================");
+                bossActive = false;
+                hasshuffled = false;
+                listtracker = 0;
+                playanimamusic = false;
+                PickOutMusic(false);
+            };
+
+            On.EntityStates.Missions.ProvidenceBossEncounter.Phase1.OnEnter += (orig, self) =>
+            {
+                orig(self);
+                Debug.Log("====================== PROVIDENCE BOSS FIGHT START ======================");
+                bossActive = true;
+                hasshuffled = false;
+                listtracker = 0;
+                PickOutMusic(true);
+            };
+
+            On.EntityStates.Missions.ProvidenceBossEncounter.BossDeath.OnEnter += (orig, self) =>
+            {
+                orig(self);
+                Debug.Log("====================== PROVIDENCE BOSS FIGHT END ======================");
+                bossActive = false;
+                hasshuffled = false;
+                listtracker = 0;
+                PickOutMusic(false);
+            };
+
+            On.RoR2.Quests.TrialQuests.BaseTrialQuest.OnEnter += (orig, self) =>
+            {
+                orig(self);
+
+                if (winnowingreckoningenabled)
+                {
+
+                    Debug.Log("====================== WINNOWING TRIAL START ======================");
+                    bossActive = true;
+                    hasshuffled = false;
+                    listtracker = 0;
+                    PickOutMusic(true);
+                }
+            };
+
+            On.RoR2.Quests.TrialQuests.BaseTrialQuest.OnExit += (orig, self) =>
+            {
+                orig(self);
+
+                if (winnowingreckoningenabled)
+                {
+                    Debug.Log("====================== WINNOWING TRIAL END ======================");
+                    bossActive = false;
+                    hasshuffled = false;
+                    listtracker = 0;
+                    PickOutMusic(false);
+                }
+            };
+
+
+
+
+
             if (enemiesreturnswrapper.Present)
             {
                 enemiesreturnswrapper.Init(this);
@@ -443,7 +591,7 @@ namespace OriginalSoundTrack
 
             SceneManager.sceneLoaded += (scene, mode) =>
             {
-                Debug.Log("====================== CHANGE SCENE, GD REFERENCE ========================");
+                Debug.Log("====================== CHANGE SCENE ========================");
                 Debug.Log(scene.name);
 
                 currentScene = scene.name;
@@ -457,8 +605,25 @@ namespace OriginalSoundTrack
                     afterBossPhase = true;
                     bossActive = false;
                     hasshuffled = false;
+                    playanimamusic = false;
                     listtracker = 0;
                     JudgementWaveCounter = 0;
+                    mithrixaltoutro = false;
+                    PickOutMusic();
+                    return;
+                }
+
+                if (currentScene == "outro" && mithrixaltoutro)
+                {
+                    extratracksfrfr = true; 
+                    lastStageIndex = currentStageIndex;
+                    afterBossPhase = false;
+                    bossActive = false;
+                    hasshuffled = false;
+                    playanimamusic = false;
+                    listtracker = 0;
+                    JudgementWaveCounter = 0;
+                    mithrixaltoutro = false;
                     PickOutMusic();
                     return;
                 }
@@ -471,12 +636,14 @@ namespace OriginalSoundTrack
                     }
 
                     lastStageIndex = currentStageIndex;
+                    playanimamusic = false;
                     afterBossPhase = false;
                     extratracksfrfr = false;
                     bossActive = false;
                     hasshuffled = false;
                     listtracker = 0;
                     JudgementWaveCounter = 0;
+                    mithrixaltoutro = false;
                     PickOutMusic(); 
                 }
                 else
@@ -485,8 +652,10 @@ namespace OriginalSoundTrack
                     {
                         extratracksfrfr = false;
                         hasshuffled = false;
+                        playanimamusic = false;
                         listtracker = 0;
                         JudgementWaveCounter = 0;
+                        mithrixaltoutro = false;
                         PickOutMusic();
                     }
                 }
@@ -504,6 +673,7 @@ namespace OriginalSoundTrack
                 case postbossmusicmode.alttrack:
                     Debug.Log("==================== Alt Stage Track Post-Tp ENABLED!!!!!!!!!!!! ====================");
                     bossActive = false;
+                    extratracksfrfr=false;
                     afterBossPhase = true;
                     hasshuffled = false;
                     listtracker = 0;
@@ -513,6 +683,7 @@ namespace OriginalSoundTrack
                 case postbossmusicmode.normaltrack:
                     Debug.Log("==================== Normal Stage Track Post-Tp ENABLED!!!!!!!!!!!! ====================");
                     bossActive = false;
+                    extratracksfrfr = false;
                     hasshuffled = false;
                     listtracker = 0;
                     PickOutMusic();
@@ -574,11 +745,15 @@ namespace OriginalSoundTrack
 
                 bool matchScene = sceneMostlyMatches(music.scenes);
 
+                bool tempanimavar = playanimamusic;
+
                 var bossTest = isForTeleporter == music.boss;
 
                 var postloopmusicuwu = playerhaslooped && storedloopstages != null && storedloopstages.Contains(currentScene);
 
                 var extratrackstempvar = extratracksfrfr;
+
+                var extratracksjudgementcheck = extratracksfrfr && !currentScene.Contains("enemiesreturns_judgementoutro");
 
                 if (simulacrumactive)
                 {
@@ -587,10 +762,11 @@ namespace OriginalSoundTrack
 
                 if (afterBossPhase)
                 {
-                    return music.afterboss && matchScene && music.postloopvariant == postloopmusicuwu && music.fullName != null;
+                    return music.afterboss && matchScene && music.postloopvariant == postloopmusicuwu && music.isextratrack == extratracksjudgementcheck && music.fullName != null;
                 }
 
-                return music.fullName != null && bossTest && matchScene && music.postloopvariant == postloopmusicuwu && music.isextratrack == extratrackstempvar && !music.afterboss && !music.simulacrum;
+                return music.fullName != null && bossTest && matchScene && music.postloopvariant == postloopmusicuwu && music.isextratrack == extratrackstempvar
+                && music.soulboundboss == tempanimavar && !music.afterboss && !music.simulacrum;
             }).ToArray();
 
 #if DEBUG
@@ -687,6 +863,11 @@ namespace OriginalSoundTrack
                 outputDevice.Init(fader);
 #if DEBUG
                 Debug.Log("====== Now Playing: " + file);
+
+                if (EnableMetaData.Value == true && RoR2.Run.instance != null)
+                {
+                    DisplayMetaData(file);
+                }
 #endif
                 outputDevice.Play();
                 songPaused = false;
@@ -696,6 +877,38 @@ namespace OriginalSoundTrack
 #if DEBUG
                 Debug.Log("PlayMusic: Already playing: " + file);
 #endif
+            }
+        }
+
+        private string lasttitle = "";
+        private void DisplayMetaData(string file)
+        {
+            try
+            {
+                using (var tagFile = TagLib.File.Create(file))
+                {
+                    string artist = string.Join(", ", tagFile.Tag.Performers);
+                    string title = tagFile.Tag.Title;
+
+                    if (title == lasttitle)
+                        return;
+
+                    if (String.IsNullOrEmpty(artist))
+                        artist = "???";
+
+                    if (String.IsNullOrEmpty(title))
+                        title = "unknown song";
+
+                    Chat.AddMessage($"<style=cWorldEvent>♬ Currently Playing: {artist} - {title} ♬</style>");
+
+                    lasttitle = title;
+                }
+                   
+            }
+            catch (Exception ex)
+            {
+                Debug.Log("OSTMODPLUS failed to display song metadata oopsie doopsie");
+                Debug.Log(ex);
             }
         }
 
@@ -748,6 +961,7 @@ namespace OriginalSoundTrack
             public bool simulacrum = false;
             public bool postloopvariant = false;
             public bool isextratrack = false;
+            public bool soulboundboss = false;
         }
 
         public class LoopStream : WaveStream

@@ -70,7 +70,7 @@ namespace OriginalSoundTrack
                 ostplugin.PickOutMusic(true);
             }
 
-            if (ostplugin.JudgementWaveCounter == 5 && ostplugin.extratracksenabled)
+            if (ostplugin.JudgementWaveCounter == 5 && ostplugin.judgementfinalwavesenabled)
             {
                 Debug.Log("====================== LAST 2 WAVES REMAINING ======================");
                 ostplugin.extratracksfrfr = true;
