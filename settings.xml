@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <settings>
   <!-- Master volume is moved to the config file, this line does absolutely nothing -->
   <volume>0.4</volume>
@@ -20,6 +20,19 @@
   "shuffleonce" // picks a random song first and then continously goes down the list and loops back.
   --> 
 
+  <extratracksettings
+   artifacttrialmusic="true"
+   judgementwave5track="true"
+   soultrialtptrack="true"
+   karma8mithrixtrack="true"
+   winnowingreckoning="true"
+  /> <!-- controls whether to play extra tracks for specific events or encounters that didnt initially have a track(more information below) -->
+
+  <postloopstagetracksettings
+    loopscenes="villagenight,lakesnight,blahblahblah" 
+    enableatloop="1" 
+  />   <!-- determines which stages will have an alternative track after the player loops, you can also change how many times the player has to loop before the music for the listed stages changes-->
+ 
   <!-- To have this plugin scan a different directory for music files,
         Uncomment <music-path> below (remove <!- - and - -> from the line below) -->
   <!-- <music-path>C:\Users\YourName\Music\SomeMusicFolder</music-path> -->
@@ -33,11 +46,12 @@
             boss="false"
             volume="1"
             loop="false" // or true depending on your use case
+            soulboundboss="true" // only used for... you guessed it! the two final bosses fought at the soulbound threshold
             afterboss="true" // can only be used for mithrix and post teleporter currently. post tp tracks are disabled by default, to enable them set "aftertptracks" to true and put afterboss under the song definition.
         />
         
         "afterboss" can now be used for judgement outro and arraign as well.
-	
+         
         "name" must match the file name exactly. Supported extensions are ".mp3" and ".wav" (case sensitive).
 
         "scenes" are the comma separated scene IDs (or levels) that will have a chance to play this music.
@@ -55,8 +69,16 @@
         "loop" is well... a function of course, i mean what else do you expect me to say? loops the song when true and 
         plays silence or moves on to the next track once the current song finishes when false
 
+        "isextratrack" songs marked with this tag only play during specific points (as mentioned below) of a boss or stage.
+        each individual track can be toggled in "extratracksettings"
+        "artifacttrialmusic" plays songs marked with isextratrack when the artifact trial starts
+        "judgementwave5track" plays songs marked with isextratrack when the judgement trial goes past wave 4
+        "soultrialtptrack" plays songs marked with isextratrack when the teleporter gets overcharged (technically a vanilla thing but just incase someone doesnt want to use this)
+        "karma8mithrixtrack" plays songs marked with isextratrack when encountering mithrix while having karma 8 in a run (persists during escape and outro)
+        "winnowingreckoning" plays songs with boss set to true when you exit the ring in the winnowing trials
+
         You can have multiple <song> definitions with the same or similar data. If a scene matches multiple <song>'s
-        then this plugin will choose one randomly. If NO matches are found, then the plugin will choose a random
+        then this plugin will choose one depending on the current randomization setting. If NO matches are found, then the plugin will choose a random
         sound file it found in the plugin folder.
     -->
 <music>
@@ -152,6 +174,16 @@
             loop="true"
 			afterboss="true"
 		/>
+
+<!-- Soul-Binding Trial TP Music -->
+        <song
+            name="ExampleSongRitual.mp3"
+            scenes="golemplains,golemplains2"
+            boss="true"
+            isextratrack="true"
+            volume="0.85"
+            loop="false"
+        />	
 		
 <!-- Simulacrum Music -->
         <song
@@ -988,19 +1020,26 @@
             volume="0.85" 
             loop="true"
         />
-<!-- Artifact Boss Music -->
+
+      <song
+            name="ExampleWinnowingSong.mp3"
+            scenes="sad1,surv2,soul_perftest,soul1"
+            boss="False"
+            volume="0.85" 
+            loop="true"
+        />
         <song
-            name="SHRB_01_BulwarksArtifact.mp3"
-            scenes="artifactworld,artifactworld01,artifactworld02,artifactworld03"
+            name="ExampleWinnowingSongTrialStart.mp3"
+            scenes="sad1,surv2,soul_perftest,soul1"
             boss="true"
-            volume="0.90" 
+            volume="0.85"
             loop="false"
         />
         <song
-            name="SHRB_01_BulwarksArtifactLoop.mp3"
-            scenes="artifactworld,artifactworld01,artifactworld02,artifactworld03"
+            name="ExampleWinnowingSongTrialStartLoop.mp3"
+            scenes="sad1,surv2,soul_perftest,soul1"
             boss="true"
-            volume="0.90" 
+            volume="0.85" 
             loop="true"
         />
 <!-- Void Route Music -->
@@ -1031,6 +1070,87 @@
             boss="False"
             volume="0.85" 
             loop="true"
+        />
+
+    <!-- Terminal Lucidity Route -->
+        <song
+            name="ExampleSouldBoundWaves.mp3"
+            scenes="champrush"
+            boss="true"
+            volume="0.85" 
+            loop="false"
+        />
+        <song
+            name="ExampleSouldBoundWavesLoop.mp3"
+            scenes="champrush"
+            boss="true"
+            volume="0.85" 
+            loop="true"
+        />
+        <song
+            name="ExampleSouldBoundWavesBossSong.mp3"
+            scenes="champrush"
+            boss="true"
+            soulboundboss="true"
+            volume="0.85"
+            loop="false"
+        />
+       <song
+            name="ExampleSouldBoundWavesBossSongLoop.mp3"
+            scenes="champrush"
+            boss="true"
+            soulboundboss="true"
+            volume="0.85"
+            loop="true"
+        />
+
+        <song
+            name="Examplesongblahblahblah.mp3"
+            scenes="ultima,champrush"
+            boss="false"
+            volume="0.85" 
+            loop="true"
+        />
+        <song
+            name="ExamplesongblahblahblahBoss.mp3"
+            scenes="ultima"
+            boss="true"
+            afterboss="false"
+            volume="0.85" 
+            loop="false"
+        />
+       <song
+            name="ExamplesongblahblahblahBossLoop.mp3"
+            scenes="ultima"
+            boss="true"
+            afterboss="false"
+            volume="0.85" 
+            loop="true"
+        />
+    <!-- post loop stage tracks -->
+        <song
+            name="ExamplePostLoopSong.mp3"
+            scenes="lakesnight,villagenight"
+            boss="false"
+            volume="0.95"
+            loop="false"
+            postloopvariant="true"
+        />
+        <song
+            name="ExamplePostLoopSongLoop.mp3"
+            scenes="lakesnight,villagenight"
+            boss="false"
+            volume="0.95"
+            loop="true"
+            postloopvariant="true"
+        />
+        <song
+            name="ExamplePostLoopSongBoss.mp3"
+            scenes="lakesnight,villagenight"
+            boss="true"
+            volume="0.95"
+            loop="false"
+            postloopvariant="true"
         />
 <!-- Modded Stages -->
         <song
@@ -1070,5 +1190,68 @@
             volume="0.99" 
             loop="true"
         />
+   <!-- EXTRA TRACKS -->
+
+        <song
+            name="SHRB_01_BulwarksArtifact.mp3"
+            scenes="artifactworld,artifactworld01,artifactworld02,artifactworld03" 
+            boss="false"
+            isextratrack="true"
+            volume="0.90" 
+            loop="false"
+        />
+        <song
+            name="SHRB_01_BulwarksArtifactLoop.mp3"
+            scenes="artifactworld,artifactworld01,artifactworld02,artifactworld03"
+            boss="false"
+            isextratrack="true"
+            volume="0.90" 
+            loop="true"
+        />
+
+        <song
+            name="SF_04_JudgementArenaFinalWaves.mp3"
+            scenes="enemiesreturns_outoftime"
+            boss="true"
+            isextratrack="true"
+            volume="1.05" 
+            loop="false"
+        />
+       <song
+            name="SF_04_JudgementArenaFinalWavesLoop.mp3"
+            scenes="enemiesreturns_outoftime"
+            boss="true"
+            isextratrack="true"
+            volume="1.05" 
+            loop="true"
+        />
+        <song
+            name="ExampleKarma8Mithrix.mp3"
+            scenes="moon,moon2"
+            boss="true"
+            isextratrack="true"
+            afterboss="false"
+            volume="0.85" 
+            loop="false"
+        />
+        <song
+            name="ExampleKarma8Escape.mp3"
+            scenes="moon,moon2"
+            boss="false"
+            isextratrack="true"
+            afterboss="true"
+            volume="0.85" 
+            loop="false"
+        />
+        <song
+            name="ExampleKarma8Outro.mp3"
+            scenes="Outro"
+            boss="false"
+            isextratrack="true"
+            afterboss="false"
+            volume="0.85" 
+            loop="false"
+        />
+
     </music>
 </settings>
