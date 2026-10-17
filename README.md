@@ -10,7 +10,8 @@ i probably wouldnt have made these additions if i didnt had access to it lol
 * individual loop setting for tracks
 * boss tracks for all dlc "final" bosses
 * mithrix escape track
+* seperate karma 8 escape track
 * a toggleable post-teleporter music setting within the xml config
-* bulwarks now has a seperate track for the artifact trial
+* extra tracks toggle for specific events
 * support for enemiesreturns's judgement stage has been added
 * a toggleable song randomization within the xml config
