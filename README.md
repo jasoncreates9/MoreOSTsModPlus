@@ -15,3 +15,4 @@ i probably wouldnt have made these additions if i didnt had access to it lol
 * extra tracks toggle for specific events
 * support for enemiesreturns's judgement stage has been added
 * a toggleable song randomization within the xml config
+* displaying the artist and song title from metadata in chat
